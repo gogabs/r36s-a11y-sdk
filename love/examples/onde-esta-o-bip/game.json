@@ -1,0 +1,11 @@
+{
+  "id": "onde-esta-o-bip-love",
+  "name": "Onde está o bip (LÖVE)",
+  "description": "Descubra de que lado o bip tocou.",
+  "version": "0.1.0",
+  "contract": 1,
+  "runtime": "love",
+  "exec": ".",
+  "languages": ["pt-BR"],
+  "author": "R36S A11y"
+}
