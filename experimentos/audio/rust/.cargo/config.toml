@@ -1,0 +1,6 @@
+[target.aarch64-unknown-linux-gnu]
+linker = "./zcc.cmd"
+
+[profile.release]
+strip = true
+opt-level = "z"

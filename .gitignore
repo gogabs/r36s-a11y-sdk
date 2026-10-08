@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+experimentos/audio/bin/
+experimentos/audio/rust/target/
+experimentos/audio/csharp/bin/
+experimentos/audio/csharp/obj/
