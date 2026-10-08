@@ -13,6 +13,7 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | [`docs/contrato.md`](docs/contrato.md) | O contrato entre jogos e a plataforma: pacote, ambiente e regras de convivência |
 | [`docs/audio-por-linguagem.md`](docs/audio-por-linguagem.md) | Como fazer áudio em Python, LÖVE, Go, Rust e C# no console |
 | [`python/`](python/) | Biblioteca-ponte Python (`r36s_a11y`) e jogo de exemplo |
+| [`go/`](go/) | Biblioteca-ponte Go (`a11y`), sem cgo, e jogo de exemplo |
 | [`experimentos/audio/`](experimentos/audio/) | Testes de áudio posicional nas cinco linguagens |
 
 ## Como funciona
@@ -48,7 +49,8 @@ Veja [`python/README.md`](python/README.md).
 | Linguagem | Biblioteca |
 |---|---|
 | Python | 0.1, funcionando no console |
-| LÖVE, Go, Rust, C# | planejadas; áudio já validado |
+| Go | 0.1, funcionando no console |
+| LÖVE, Rust, C# | planejadas; áudio já validado |
 
 ## Licença
 

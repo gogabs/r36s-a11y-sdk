@@ -1,0 +1,11 @@
+{
+  "id": "onde-esta-o-bip-go",
+  "name": "Onde está o bip (Go)",
+  "description": "Descubra de que lado o bip tocou.",
+  "version": "0.1.0",
+  "contract": 1,
+  "runtime": "native",
+  "exec": "onde-esta-o-bip",
+  "languages": ["pt-BR"],
+  "author": "R36S A11y"
+}
