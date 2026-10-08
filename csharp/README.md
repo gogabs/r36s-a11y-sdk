@@ -87,7 +87,8 @@ scp -r publish r36s:/opt/a11y/games/meu-jogo
 ```
 
 `game.json` com `"runtime": "dotnet"` e `"exec": "MeuJogo.dll"` (veja o
-[contrato](../docs/contrato.md)).
+[contrato](../docs/contrato.md)). Se preferir `"runtime": "native"` com o
+executável `MeuJogo`, lembre do `chmod +x` depois de copiar do Windows.
 
 ## API
 

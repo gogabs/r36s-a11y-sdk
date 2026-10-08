@@ -12,6 +12,13 @@ public sealed class Audio
 {
     private const int MaxSources = 32;
 
+    // Antes de ReverbPresets: campos estáticos inicializam na ordem em que aparecem.
+    private static readonly string[] ReverbNames =
+    {
+        "density", "diffusion", "gain", "gain_hf", "decay", "decay_hf_ratio",
+        "reflections_gain", "reflections_delay", "late_gain", "late_delay",
+    };
+
     /// <summary>Ambientes prontos (baseados nos presets EFX da Creative).</summary>
     public static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>> ReverbPresets =
         new Dictionary<string, IReadOnlyDictionary<string, double>>
@@ -24,12 +31,6 @@ public sealed class Audio
             ["igreja"] = P(1, 1, 0.32, 0.6, 5.5, 0.6, 0.2, 0.04, 1.3, 0.05),
             ["floresta"] = P(1, 0.3, 0.32, 0.02, 1.49, 0.54, 0.05, 0.16, 0.2, 0.09),
         };
-
-    private static readonly string[] ReverbNames =
-    {
-        "density", "diffusion", "gain", "gain_hf", "decay", "decay_hf_ratio",
-        "reflections_gain", "reflections_delay", "late_gain", "late_delay",
-    };
 
     private static IReadOnlyDictionary<string, double> P(params double[] v) =>
         ReverbNames.Select((n, i) => (n, v[i])).ToDictionary(x => x.n, x => x.Item2);

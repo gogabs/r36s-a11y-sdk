@@ -63,4 +63,10 @@ public class InputTests
         Assert.Equal((1, 2, 44100), (channels, width, rate));
         Assert.NotEmpty(data);
     }
+
+    [Fact]
+    public void ReverbPresetsHaveAllParameters()
+    {
+        foreach (var preset in Audio.ReverbPresets.Values) Assert.Equal(10, preset.Count);
+    }
 }

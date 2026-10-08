@@ -51,7 +51,7 @@ Veja [`python/README.md`](python/README.md).
 |---|---|
 | Python | 0.1, funcionando no console |
 | Go | 0.1, funcionando no console |
-| C# | 0.1, aguardando teste no console |
+| C# | 0.1, funcionando no console (runtime .NET compartilhado) |
 | LÖVE, Rust | planejadas; áudio já validado |
 
 ## Licença
