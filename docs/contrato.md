@@ -88,7 +88,7 @@ A galeria inicia o jogo com a pasta do jogo como diretório atual e:
 | `A11Y_CONTRACT` | `1` | Versão do contrato da plataforma |
 | `A11Y_GAME_DIR` | `/opt/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
 | `A11Y_SAVE_DIR` | `/opt/a11y/saves/corrida-de-sapos` | Já criada; único lugar gravável garantido |
-| `A11Y_LANG` | `pt-BR` | Idioma do sistema |
+| `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações da galeria (`/opt/a11y/etc/sistema.conf`) |
 
 Rodando fora da galeria (SSH, Ports, PC), a biblioteca-ponte preenche
 valores padrão.
