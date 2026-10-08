@@ -34,6 +34,43 @@ AL_DISTANCE_MODEL = 0xD000
 AL_INVERSE_DISTANCE_CLAMPED = 0xD002
 ALC_HRTF_SOFT = 0x1992
 
+# EFX (reverberação)
+AL_EFFECT_TYPE = 0x8001
+AL_EFFECT_REVERB = 0x0001
+AL_EFFECTSLOT_EFFECT = 0x0001
+AL_AUXILIARY_SEND_FILTER = 0x20006
+AL_FILTER_NULL = 0
+REVERB_PARAMS = {   # nome -> parâmetro AL_REVERB_*
+    "density": 0x0001, "diffusion": 0x0002, "gain": 0x0003, "gain_hf": 0x0004,
+    "decay": 0x0005, "decay_hf_ratio": 0x0006, "reflections_gain": 0x0007,
+    "reflections_delay": 0x0008, "late_gain": 0x0009, "late_delay": 0x000A,
+}
+
+# Ambientes prontos (baseados nos presets EFX da Creative).
+REVERB_PRESETS = {
+    "quarto": dict(density=0.43, diffusion=1.0, gain=0.32, gain_hf=0.6, decay=0.4,
+                   decay_hf_ratio=0.83, reflections_gain=0.15, reflections_delay=0.002,
+                   late_gain=1.06, late_delay=0.003),
+    "corredor": dict(density=1.0, diffusion=1.0, gain=0.32, gain_hf=0.71, decay=1.49,
+                     decay_hf_ratio=0.59, reflections_gain=0.25, reflections_delay=0.007,
+                     late_gain=1.66, late_delay=0.011),
+    "estacionamento": dict(density=1.0, diffusion=1.0, gain=0.32, gain_hf=1.0, decay=1.65,
+                           decay_hf_ratio=1.5, reflections_gain=0.21, reflections_delay=0.008,
+                           late_gain=0.27, late_delay=0.012),
+    "cozinha": dict(density=1.0, diffusion=0.9, gain=0.32, gain_hf=0.9, decay=1.0,
+                    decay_hf_ratio=1.2, reflections_gain=0.5, reflections_delay=0.004,
+                    late_gain=1.2, late_delay=0.006),
+    "metro": dict(density=1.0, diffusion=1.0, gain=0.32, gain_hf=0.71, decay=3.1,
+                  decay_hf_ratio=1.0, reflections_gain=0.15, reflections_delay=0.03,
+                  late_gain=1.4, late_delay=0.03),
+    "igreja": dict(density=1.0, diffusion=1.0, gain=0.32, gain_hf=0.6, decay=5.5,
+                   decay_hf_ratio=0.6, reflections_gain=0.2, reflections_delay=0.04,
+                   late_gain=1.3, late_delay=0.05),
+    "floresta": dict(density=1.0, diffusion=0.3, gain=0.32, gain_hf=0.02, decay=1.49,
+                     decay_hf_ratio=0.54, reflections_gain=0.05, reflections_delay=0.16,
+                     late_gain=0.2, late_delay=0.09),
+}
+
 FORMATS = {
     (1, 1): AL_FORMAT_MONO8, (1, 2): AL_FORMAT_MONO16,
     (2, 1): AL_FORMAT_STEREO8, (2, 2): AL_FORMAT_STEREO16,
@@ -116,13 +153,16 @@ class Sound:
         self.buffer_id = buffer_id
         self.channels = channels
 
-    def play(self, loop=False, volume=1.0, pitch=1.0, pos=None, pan=None):
+    def play(self, loop=False, volume=1.0, pitch=1.0, pos=None, pan=None, reverb=None):
         """Toca o som e devolve a Voice que está tocando.
 
         pos=(x, y, z) posiciona em 3D; pan de -1 (esquerda) a 1 (direita) é um
         atalho para posição a 1 m do ouvinte. Sem pos nem pan, toca no centro.
+        reverb: passa pelo ambiente (Audio.set_reverb); padrão é só com pos.
         """
-        return self.audio._play(self, loop, volume, pitch, pos, pan)
+        if reverb is None:
+            reverb = pos is not None
+        return self.audio._play(self, loop, volume, pitch, pos, pan, reverb)
 
 
 class Voice:
@@ -172,7 +212,12 @@ class Voice:
             self.audio.al.alSourcePause(self.source_id)
 
     def resume(self):
-        if self.source_id is not None:
+        """Retoma um som pausado (sons tocando ou parados não são afetados)."""
+        if self.source_id is None:
+            return
+        state = ctypes.c_int(0)
+        self.audio.al.alGetSourcei(self.source_id, AL_SOURCE_STATE, ctypes.byref(state))
+        if state.value == AL_PAUSED:
             self.audio.al.alSourcePlay(self.source_id)
 
     def stop(self, fade=0.0):
@@ -244,6 +289,48 @@ class Audio:
             self.hrtf = bool(status.value)
         al.alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED)
         self.listener((0.0, 0.0, 0.0), 0.0)
+        self.slot = None
+        self.effect = None
+        try:
+            self._open_efx()
+        except (AttributeError, OSError):
+            self.slot = None   # sem EFX: tudo funciona, só sem reverberação
+
+    def _open_efx(self):
+        al = self.al
+        if not al.alcIsExtensionPresent(self.device, b"ALC_EXT_EFX"):
+            return
+        al.alEffecti.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_int]
+        al.alEffectf.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_float]
+        al.alAuxiliaryEffectSloti.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_int]
+        al.alSource3i.argtypes = [ctypes.c_uint, ctypes.c_int, ctypes.c_int,
+                                  ctypes.c_int, ctypes.c_int]
+        slot, effect = ctypes.c_uint(0), ctypes.c_uint(0)
+        al.alGenAuxiliaryEffectSlots(1, ctypes.byref(slot))
+        al.alGenEffects(1, ctypes.byref(effect))
+        al.alEffecti(effect.value, AL_EFFECT_TYPE, AL_EFFECT_REVERB)
+        self.slot, self.effect = slot.value, effect.value
+        self.reverb_on = False
+
+    def set_reverb(self, preset=None, **params):
+        """Muda o ambiente: um nome de REVERB_PRESETS, parâmetros soltos, ou None para desligar.
+
+        Afeta os sons tocados com reverb (por padrão, os que têm pos).
+        """
+        if not self.available or self.slot is None:
+            return
+        al = self.al
+        if preset is None and not params:
+            al.alAuxiliaryEffectSloti(self.slot, AL_EFFECTSLOT_EFFECT, 0)
+            self.reverb_on = False
+            return
+        values = dict(REVERB_PRESETS[preset]) if preset else {}
+        values.update(params)
+        for name, value in values.items():
+            al.alEffectf(self.effect, REVERB_PARAMS[name], ctypes.c_float(value))
+        # recarregar o efeito no slot aplica os parâmetros novos
+        al.alAuxiliaryEffectSloti(self.slot, AL_EFFECTSLOT_EFFECT, self.effect)
+        self.reverb_on = True
 
     # --- sons --------------------------------------------------------
     def load(self, name, path):
@@ -295,7 +382,7 @@ class Audio:
             al.alSourcei(sid, AL_SOURCE_RELATIVE, 0)
         al.alSource3f(sid, AL_POSITION, *[ctypes.c_float(v) for v in pos])
 
-    def _play(self, sound, loop, volume, pitch, pos, pan):
+    def _play(self, sound, loop, volume, pitch, pos, pan, reverb=False):
         if not self.available or sound.buffer_id is None:
             return _NullVoice()
         al = self.al
@@ -308,6 +395,9 @@ class Audio:
         al.alSourcef(sid, AL_ROLLOFF_FACTOR, ctypes.c_float(1.0))
         al.alSourcef(sid, AL_MAX_DISTANCE, ctypes.c_float(100.0))
         self._place(sid, pos, pan)
+        if self.slot is not None:
+            al.alSource3i(sid, AL_AUXILIARY_SEND_FILTER,
+                          self.slot if reverb else 0, 0, AL_FILTER_NULL)
         voice = Voice(self, sid)
         voice._gain(volume)
         self.voices[sid] = voice

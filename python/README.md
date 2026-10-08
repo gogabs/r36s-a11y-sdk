@@ -76,6 +76,15 @@ voz.stop(fade=0.5); voz.playing
 game.sound.listener((x, y, z), facing=90)              # graus; 0 = frente, 90 = direita
 ```
 
+Ambiente (reverberação EFX da OpenAL), para sons tocados com `pos` ou
+`reverb=True`:
+
+```python
+game.sound.set_reverb("igreja")   # quarto, corredor, estacionamento, cozinha, metro, igreja, floresta
+game.sound.set_reverb(decay=2.0, gain=0.3)   # ou parâmetros soltos
+game.sound.set_reverb(None)       # desliga
+```
+
 Coordenadas em metros: `x` positivo à direita, `y` para cima, `z` negativo
 à frente. Só sons **mono** são posicionados. Sons de banda larga (ruído,
 estalos) ficam mais fáceis de localizar na frente e atrás do que tons puros.
