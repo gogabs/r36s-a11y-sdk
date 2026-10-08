@@ -19,13 +19,18 @@ def _socket_path():
 
 
 def _user_voice():
-    """Lê RATE, PITCH e VOLUME (0 a 100) e converte para -100..100 do SSIP."""
+    """Lê a voz do usuário: RATE, PITCH e VOLUME (0 a 100, convertidos para
+    -100..100 do SSIP) e VOICE_MODULE / VOICE (texto, pode vir entre aspas)."""
     values = {}
     try:
         with open(VOICE_CONF) as f:
             for line in f:
                 key, sep, val = line.strip().partition("=")
-                if sep and key in ("RATE", "PITCH", "VOLUME"):
+                if sep and key in ("VOICE_MODULE", "VOICE"):
+                    val = val.strip().strip("'\"")
+                    if val:
+                        values[key] = val
+                elif sep and key in ("RATE", "PITCH", "VOLUME"):
                     try:
                         values[key] = max(0, min(100, int(val))) * 2 - 100
                     except ValueError:
@@ -64,9 +69,16 @@ class Speech:
         self.sock, self.buf = s, b""
         user = os.environ.get("USER", "ark")
         self._cmd("SET SELF CLIENT_NAME %s:a11y:%s" % (user, self.client))
+        voice = _user_voice()
+        # módulo antes do idioma, e voz depois: trocar o idioma pode trocar a voz
+        if "VOICE_MODULE" in voice:
+            self._cmd("SET SELF OUTPUT_MODULE %s" % voice["VOICE_MODULE"])
         self._cmd("SET SELF LANGUAGE %s" % self.language)
-        for key, val in _user_voice().items():
-            self._cmd("SET SELF %s %d" % (key, val))
+        if "VOICE" in voice:
+            self._cmd("SET SELF SYNTHESIS_VOICE %s" % voice["VOICE"])
+        for key in ("RATE", "PITCH", "VOLUME"):
+            if key in voice:
+                self._cmd("SET SELF %s %d" % (key, voice[key]))
         self._cmd("SET SELF NOTIFICATION END on")
         self._cmd("SET SELF NOTIFICATION CANCEL on")
 

@@ -47,19 +47,26 @@ func speechSocket() string {
 	return filepath.Join(runtime, "speech-dispatcher", "speechd.sock")
 }
 
-// userVoice lê RATE, PITCH e VOLUME (0 a 100) e converte para -100..100.
-func userVoice() map[string]int {
+// userVoice lê RATE, PITCH e VOLUME (0 a 100, convertidos para -100..100) e
+// VOICE_MODULE / VOICE (texto, pode vir entre aspas).
+func userVoice() (map[string]int, map[string]string) {
 	path := os.Getenv("A11Y_VOZ_CONF")
 	if path == "" {
 		path = "/opt/a11y/etc/voz.conf"
 	}
-	out := map[string]int{}
+	out, names := map[string]int{}, map[string]string{}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return out
+		return out, names
 	}
 	for _, line := range strings.Split(string(data), "\n") {
 		k, v, ok := strings.Cut(strings.TrimSpace(line), "=")
+		if ok && (k == "VOICE_MODULE" || k == "VOICE") {
+			if v = strings.Trim(strings.TrimSpace(v), `'"`); v != "" {
+				names[k] = v
+			}
+			continue
+		}
 		if !ok || (k != "RATE" && k != "PITCH" && k != "VOLUME") {
 			continue
 		}
@@ -68,7 +75,7 @@ func userVoice() map[string]int {
 			out[k] = n*2 - 100
 		}
 	}
-	return out
+	return out, names
 }
 
 // escapeText formata o texto para o comando SPEAK do SSIP.
@@ -94,12 +101,20 @@ func (s *Speech) connect() error {
 	if user == "" {
 		user = "ark"
 	}
-	cmds := []string{
-		fmt.Sprintf("SET SELF CLIENT_NAME %s:a11y:%s", user, s.client),
-		"SET SELF LANGUAGE " + s.language,
+	params, names := userVoice()
+	cmds := []string{fmt.Sprintf("SET SELF CLIENT_NAME %s:a11y:%s", user, s.client)}
+	// módulo antes do idioma, e voz depois: trocar o idioma pode trocar a voz
+	if m, ok := names["VOICE_MODULE"]; ok {
+		cmds = append(cmds, "SET SELF OUTPUT_MODULE "+m)
 	}
-	for k, v := range userVoice() {
-		cmds = append(cmds, fmt.Sprintf("SET SELF %s %d", k, v))
+	cmds = append(cmds, "SET SELF LANGUAGE "+s.language)
+	if v, ok := names["VOICE"]; ok {
+		cmds = append(cmds, "SET SELF SYNTHESIS_VOICE "+v)
+	}
+	for _, k := range []string{"RATE", "PITCH", "VOLUME"} {
+		if v, ok := params[k]; ok {
+			cmds = append(cmds, fmt.Sprintf("SET SELF %s %d", k, v))
+		}
 	}
 	cmds = append(cmds, "SET SELF NOTIFICATION END on", "SET SELF NOTIFICATION CANCEL on")
 	for _, c := range cmds {
