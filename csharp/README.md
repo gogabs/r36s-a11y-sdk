@@ -142,6 +142,21 @@ menu.Show();            // item 0, falando as instruções
 menu.Show(2, help: false);
 ```
 
+## Gráficos (opcionais)
+
+Formas, sprites e texto pela SDL2 do console; veja [docs/graficos.md](../docs/graficos.md).
+No PC, funcionam se as DLLs da SDL2 estiverem no PATH.
+
+```csharp
+var heroi = game.Gfx.LoadImage("sprites/heroi.png");
+game.Draw += gfx =>
+{
+    gfx.Clear(Color.Hex("#101830"));
+    gfx.Text("Sala 1", 320, 20, align: Align.Center);
+    gfx.Draw(heroi, 300, 200, scale: 2);
+};
+```
+
 ## Exemplo
 
 [`examples/OndeEstaOBip`](examples/OndeEstaOBip), o mesmo jogo dos exemplos

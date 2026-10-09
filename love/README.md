@@ -110,6 +110,11 @@ menu:show(2, false)
 menu:close()
 ```
 
+## Gráficos
+
+Use o `love.graphics` normalmente; veja [docs/graficos.md](../docs/graficos.md#löve)
+para o `conf.lua` com a janela ligada.
+
 ## Exemplo
 
 [`examples/onde-esta-o-bip`](examples/onde-esta-o-bip), o mesmo jogo dos

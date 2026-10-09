@@ -101,6 +101,20 @@ menu.open()
 Cima/baixo navegam e falam "Jogar, 1 de 3"; B confirma; A volta; Select
 repete. Enquanto aberto, o menu recebe os botões no lugar do jogo.
 
+## Gráficos (opcionais)
+
+Formas, sprites e texto pela SDL2 do console; veja [docs/graficos.md](../docs/graficos.md).
+
+```python
+heroi = game.gfx.image("sprites/heroi.png")
+
+@game.on_draw
+def desenhar(gfx):
+    gfx.clear("#101830")
+    gfx.text("Sala 1", 320, 20, align="center")
+    gfx.draw(heroi, 300, 200, scale=2)
+```
+
 ## Exemplo
 
 [`examples/onde-esta-o-bip`](examples/onde-esta-o-bip): um som toca à

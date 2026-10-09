@@ -99,6 +99,19 @@ menu.MoveSound = clique
 menu.Show(0, true)   // item inicial; true fala as instruções
 ```
 
+## Gráficos (opcionais)
+
+Formas, sprites e texto pela SDL2 do console; veja [docs/graficos.md](../docs/graficos.md).
+
+```go
+heroi, _ := g.Gfx().LoadImage("sprites/heroi.png")
+g.OnDraw(func(gfx *a11y.Graphics) {
+	gfx.Clear(a11y.Hex("#101830"))
+	gfx.Text("Sala 1", 320, 20, nil, a11y.RGB(255, 255, 255), a11y.AlignCenter)
+	gfx.Draw(heroi, 300, 200, a11y.Scale(2))
+})
+```
+
 ## Exemplo
 
 [`examples/onde-esta-o-bip`](examples/onde-esta-o-bip), o mesmo jogo do

@@ -11,6 +11,7 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | Pasta | Conteúdo |
 |---|---|
 | [`docs/contrato.md`](docs/contrato.md) | O contrato entre jogos e a plataforma: pacote, ambiente e regras de convivência |
+| [`docs/graficos.md`](docs/graficos.md) | Gráficos opcionais: formas, sprites e texto pela SDL2 do console |
 | [`docs/audio-por-linguagem.md`](docs/audio-por-linguagem.md) | Como fazer áudio em Python, LÖVE, Go, Rust e C# no console |
 | [`python/`](python/) | Biblioteca-ponte Python (`r36s_a11y`) e jogo de exemplo |
 | [`go/`](go/) | Biblioteca-ponte Go (`a11y`), sem cgo, e jogo de exemplo |
