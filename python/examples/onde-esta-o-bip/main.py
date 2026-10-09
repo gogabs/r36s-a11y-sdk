@@ -9,6 +9,7 @@ import json
 import os
 import random
 import sys
+import time
 
 # Permite rodar direto da pasta do repositório, sem instalar a biblioteca.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -51,6 +52,7 @@ class Round:
         self.score = 0
         self.answer = None      # direção certa da rodada atual
         self.waiting = False    # aceitando resposta
+        self.feedback = None    # (direção certa, acertou, quando), para o desenho
 
     def start(self):
         self.number, self.score = 0, 0
@@ -79,6 +81,7 @@ class Round:
         if button not in DIRECTIONS:
             return
         self.waiting = False
+        self.feedback = (self.answer, button == self.answer, time.monotonic())
         if button == self.answer:
             self.score += 1
             acerto.play()
@@ -142,6 +145,36 @@ def botao(button, state, ms):
         pause_menu.open()
         return
     rodada.respond(button)
+
+
+# --- gráficos (opcionais: o jogo é todo jogável pelo som) -----------------
+ARROWS = {   # direção -> pontos do triângulo, ao redor do centro (320, 260)
+    "up": [(320, 120), (290, 160), (350, 160)],
+    "down": [(320, 400), (290, 360), (350, 360)],
+    "left": [(180, 260), (220, 230), (220, 290)],
+    "right": [(460, 260), (420, 230), (420, 290)],
+}
+ouvido = game.gfx.image("images/ouvido.png")
+titulo = game.gfx.font(size=32)
+
+
+@game.on_draw
+def desenhar(gfx):
+    gfx.clear("#101830")
+    gfx.text("Onde está o bip?", 320, 20, font=titulo, color="#ffd23c", align="center")
+    if rodada.answer is not None:
+        gfx.text("Rodada %d de %d   Acertos: %d" % (rodada.number, ROUNDS, rodada.score),
+                 320, 70, color=(200, 200, 220), align="center")
+    fb = rodada.feedback
+    recent = fb is not None and time.monotonic() - fb[2] < 0.8
+    for direction, points in ARROWS.items():
+        color = (70, 80, 110)
+        if recent and direction == fb[0]:
+            color = (60, 200, 90) if fb[1] else (220, 70, 60)
+        gfx.polygon(points, color=color)
+    gfx.circle(320, 260, 60, color=(40, 50, 80))
+    gfx.circle(320, 260, 60, color=(120, 130, 170), fill=False)
+    gfx.draw(ouvido, 320 - 32, 260 - 32, scale=2)
 
 
 @game.on_start

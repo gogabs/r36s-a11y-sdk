@@ -8,6 +8,7 @@ import time
 
 from .audio import Audio
 from .buttons import DOWN, REPEAT
+from .graphics import Graphics
 from .input import GamepadReader, InputState
 from .speech import Speech
 
@@ -60,7 +61,9 @@ class Game:
         self.sound = Audio(self.dir)
         self.input = InputState(deadzone=deadzone)
 
-        self._handlers = {"button": [], "axis": [], "update": [], "quit": [], "start": []}
+        self._handlers = {"button": [], "axis": [], "update": [], "quit": [], "start": [],
+                          "draw": []}
+        self._gfx = None
         self._timers = []          # (quando, função)
         self._repeat_at = {}       # botão -> próximo repeat
         self._focus = []           # pilha de menus que recebem os botões antes do jogo
@@ -82,6 +85,19 @@ class Game:
         """fn(dt) chamado fps vezes por segundo."""
         self._handlers["update"].append(fn)
         return fn
+
+    def on_draw(self, fn):
+        """fn(gfx) desenha um quadro, logo depois dos on_update. Abre a tela."""
+        self._handlers["draw"].append(fn)
+        return fn
+
+    @property
+    def gfx(self):
+        """Os gráficos (abre a tela no primeiro uso). Veja graphics.Graphics."""
+        if self._gfx is None:
+            self._gfx = Graphics(self.name, self.dir)
+            self._gfx.open()
+        return self._gfx
 
     def on_start(self, fn):
         self._handlers["start"].append(fn)
@@ -163,6 +179,8 @@ class Game:
         signal.signal(signal.SIGTERM, stop)
         signal.signal(signal.SIGINT, stop)
 
+        if self._handlers["draw"]:
+            self.gfx  # abre a tela antes do primeiro quadro
         self._running = True
         for fn in list(self._handlers["start"]):
             fn()
@@ -192,6 +210,11 @@ class Game:
                     self.sound.update(dt)
                     for fn in list(self._handlers["update"]):
                         fn(dt)
+                    if self._handlers["draw"] and self._gfx.available:
+                        self._gfx.begin()
+                        for fn in list(self._handlers["draw"]):
+                            fn(self._gfx)
+                        self._gfx.end()
         finally:
             for fn in list(self._handlers["quit"]):
                 try:
@@ -202,3 +225,5 @@ class Game:
                 reader.close()
             self.speech.close()
             self.sound.close()
+            if self._gfx is not None:
+                self._gfx.close()
