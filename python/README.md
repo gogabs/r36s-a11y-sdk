@@ -9,8 +9,8 @@ biblioteca padrão. No console usa:
 - a OpenAL Soft do sistema, com HRTF quando disponível;
 - a `libvorbisfile` do sistema para arquivos OGG.
 
-Fora do console (no PC), a fala aparece no terminal e o áudio usa a OpenAL
-se ela estiver instalada. Ainda não há controle por teclado no PC.
+O mesmo jogo roda no PC com Windows, sem mudar nada: veja
+[Rodando no PC](#rodando-no-pc).
 
 ## Instalação
 
@@ -126,6 +126,58 @@ No console:
 scp -r python r36s:/tmp/sdk
 ssh r36s "cd /tmp/sdk/examples/onde-esta-o-bip && python3 main.py"
 ```
+
+## Rodando no PC
+
+No Windows, a biblioteca troca os bastidores sozinha e o jogo não muda.
+Serve para testar rápido; o teste final continua no console, que é mais
+lento e usa outra voz.
+
+```bat
+cd examples\onde-esta-o-bip
+python main.py
+```
+
+Rode no Prompt de Comando ou no Terminal do Windows, com a janela em foco:
+o teclado é lido do console. Se o jogo abrir a tela (`@game.on_draw`), as
+teclas passam a vir da janela do jogo, que fica com o foco.
+
+| Teclado | R36S |
+|---|---|
+| Setas | Direcional |
+| Enter ou Z | B (confirmar) |
+| Backspace ou X | A (voltar) |
+| S | X (de cima) |
+| A | Y (da esquerda) |
+| Q / W | L1 / R1 |
+| 1 / 2 | L2 / R2 |
+| 3 / 4 | L3 / R3 |
+| Esc | Start (pausa) |
+| Tab | Select (repetir) |
+| Ctrl | Fn: o que for apertado com ele não chega ao jogo |
+| Ctrl + C | Sai do jogo |
+
+**Controle de Xbox** (ou qualquer um compatível com XInput) também
+funciona, junto com o teclado, inclusive os analógicos (`lx ly rx ry`). Os
+botões valem pela posição: o de baixo (A no Xbox) é o B do R36S, o da
+direita (B no Xbox) é o A. LT e RT são L2 e R2, View é Select, Menu é
+Start e o botão Xbox é Fn (o Windows pode abrir a Game Bar com ele; Ctrl
+no teclado faz o mesmo).
+
+**Fala**: usa a voz do Windows no idioma do jogo (pt-BR, por exemplo, a
+Maria), pelo PowerShell que já vem no Windows. A voz começa a falar um ou
+dois segundos depois de abrir o jogo. Variáveis:
+
+- `A11Y_VOZ`: escolhe a voz pelo nome, por exemplo
+  `set A11Y_VOZ=Microsoft Daniel Desktop`.
+- `A11Y_FALA=terminal`: em vez de falar, escreve no terminal, para o NVDA
+  ler.
+
+**Áudio**: precisa da OpenAL Soft. Baixe os binários em
+[openal-soft.org](https://openal-soft.org/#download) e copie
+`bin\Win64\soft_oal.dll` para dentro da pasta `r36s_a11y` (ou para
+`C:\Windows\System32`). Para OGG, faça o mesmo com a `vorbisfile.dll` e
+suas dependências; ou use WAV no PC.
 
 ## Testes
 
