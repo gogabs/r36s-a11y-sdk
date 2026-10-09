@@ -47,6 +47,8 @@ type Game struct {
 	onButton []func(ButtonEvent)
 	onAxis   []func(AxisEvent)
 	onUpdate []func(dt float64)
+	onDraw   []func(gfx *Graphics)
+	gfx      *Graphics
 	onStart  []func()
 	onQuit   []func()
 }
@@ -109,6 +111,18 @@ func (g *Game) OnAxis(fn func(AxisEvent)) { g.onAxis = append(g.onAxis, fn) }
 
 // OnUpdate registra fn, chamada FPS vezes por segundo com o tempo do quadro.
 func (g *Game) OnUpdate(fn func(dt float64)) { g.onUpdate = append(g.onUpdate, fn) }
+
+// OnDraw registra fn, que desenha um quadro logo depois dos OnUpdate. Abre a tela.
+func (g *Game) OnDraw(fn func(gfx *Graphics)) { g.onDraw = append(g.onDraw, fn) }
+
+// Gfx devolve os gráficos, abrindo a tela no primeiro uso (para carregar
+// imagens e fontes antes do Run).
+func (g *Game) Gfx() *Graphics {
+	if g.gfx == nil {
+		g.gfx = newGraphics(g.Name, g.Dir)
+	}
+	return g.gfx
+}
 
 // OnStart registra fn, chamada quando o laço começa.
 func (g *Game) OnStart(fn func()) { g.onStart = append(g.onStart, fn) }
@@ -220,6 +234,9 @@ func (g *Game) Run() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
 
+	if len(g.onDraw) > 0 {
+		g.Gfx() // abre a tela antes do primeiro quadro
+	}
 	g.running = true
 	for _, fn := range g.onStart {
 		fn()
@@ -246,6 +263,13 @@ func (g *Game) Run() {
 			for _, fn := range g.onUpdate {
 				fn(dt)
 			}
+			if len(g.onDraw) > 0 && g.gfx.Available {
+				g.gfx.begin()
+				for _, fn := range g.onDraw {
+					fn(g.gfx)
+				}
+				g.gfx.end()
+			}
 		}
 	}
 }
@@ -263,4 +287,7 @@ func (g *Game) shutdown() {
 	}
 	g.Speech.close()
 	g.Sound.close()
+	if g.gfx != nil {
+		g.gfx.close()
+	}
 }

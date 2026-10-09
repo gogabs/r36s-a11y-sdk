@@ -51,7 +51,7 @@ public sealed class Audio
     internal Audio(string baseDir)
     {
         this.baseDir = baseDir;
-        if (!NativeLibrary.TryLoad(Al.Lib, out _)) return;
+        // sem OpenAL (DllNotFoundException), o catch abaixo deixa o áudio desligado
         try
         {
             device = Al.alcOpenDevice(IntPtr.Zero); // dispositivo padrão = dmix do ALSA

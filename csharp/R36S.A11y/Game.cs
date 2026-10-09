@@ -53,6 +53,14 @@ public sealed class Game
     /// <summary>A cada quadro, com o tempo do quadro em segundos.</summary>
     public event Action<double>? Update;
 
+    /// <summary>Desenha um quadro, logo depois do Update. Abre a tela.</summary>
+    public event Action<Graphics>? Draw;
+
+    private Graphics? gfx;
+
+    /// <summary>Os gráficos; abre a tela no primeiro uso (para carregar imagens e fontes antes do Run).</summary>
+    public Graphics Gfx => gfx ??= new Graphics(Name, Dir);
+
     /// <summary>Quando o laço começa.</summary>
     public event Action? Start;
 
@@ -178,6 +186,7 @@ public sealed class Game
         using var term = PosixSignalRegistration.Create(PosixSignal.SIGTERM, c => { c.Cancel = true; Stop(); });
         using var intr = PosixSignalRegistration.Create(PosixSignal.SIGINT, c => { c.Cancel = true; Stop(); });
 
+        if (Draw != null) _ = Gfx; // abre a tela antes do primeiro quadro
         running = true;
         Start?.Invoke();
         var frame = TimeSpan.FromSeconds(1.0 / Math.Max(1, options.Fps));
@@ -196,6 +205,12 @@ public sealed class Game
                 Tick();
                 Sound.Update(dt);
                 Update?.Invoke(dt);
+                if (Draw != null && gfx is { Available: true })
+                {
+                    gfx.Begin();
+                    Draw(gfx);
+                    gfx.End();
+                }
             }
         }
         finally
@@ -204,6 +219,7 @@ public sealed class Game
             catch (Exception ex) { Console.Error.WriteLine("[a11y] erro ao sair: " + ex.Message); }
             Speech.Close();
             Sound.Close();
+            gfx?.Close();
         }
     }
 
