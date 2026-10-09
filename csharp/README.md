@@ -16,7 +16,7 @@ para o terminal.
 Um jogo .NET autocontido leva o runtime inteiro junto (uns 70 MB). Aqui o
 runtime fica instalado **uma vez** no console, em `/opt/a11y/runtime/dotnet`
 (.NET 10, suporte até novembro de 2028), e cada jogo publicado tem só o
-próprio código: o exemplo inteiro, com sons, ocupa 270 KB.
+próprio código: um jogo pequeno, com sons, ocupa umas centenas de KB.
 
 Para quem desenvolve, a diferença são três linhas no `.csproj`:
 
@@ -159,8 +159,9 @@ game.Draw += gfx =>
 
 ## Exemplo
 
-[`examples/OndeEstaOBip`](examples/OndeEstaOBip), o mesmo jogo dos exemplos
-em Python e Go.
+O jogo de exemplo, com som e gráficos, está em Python:
+[`python/examples/onde-esta-o-bip`](../python/examples/onde-esta-o-bip).
+A API desta biblioteca tem os mesmos nomes, adaptados à convenção da linguagem.
 
 ## Testes
 

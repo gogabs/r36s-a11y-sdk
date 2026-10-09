@@ -114,8 +114,9 @@ g.OnDraw(func(gfx *a11y.Graphics) {
 
 ## Exemplo
 
-[`examples/onde-esta-o-bip`](examples/onde-esta-o-bip), o mesmo jogo do
-exemplo em Python.
+O jogo de exemplo, com som e gráficos, está em Python:
+[`python/examples/onde-esta-o-bip`](../python/examples/onde-esta-o-bip).
+A API desta biblioteca tem os mesmos nomes, adaptados à convenção da linguagem.
 
 ## Testes
 

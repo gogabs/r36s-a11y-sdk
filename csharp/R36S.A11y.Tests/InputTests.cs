@@ -58,7 +58,7 @@ public class InputTests
     [Fact]
     public void DecodeWav()
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "examples", "OndeEstaOBip", "sounds", "bip.wav");
+        var path = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "python", "examples", "onde-esta-o-bip", "sounds", "bip.wav");
         var (channels, width, rate, data) = Audio.DecodeWav(path);
         Assert.Equal((1, 2, 44100), (channels, width, rate));
         Assert.NotEmpty(data);

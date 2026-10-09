@@ -117,8 +117,9 @@ para o `conf.lua` com a janela ligada.
 
 ## Exemplo
 
-[`examples/onde-esta-o-bip`](examples/onde-esta-o-bip), o mesmo jogo dos
-exemplos nas outras linguagens.
+O jogo de exemplo, com som e gráficos, está em Python:
+[`python/examples/onde-esta-o-bip`](../python/examples/onde-esta-o-bip).
+A API desta biblioteca tem os mesmos nomes, adaptados à convenção da linguagem.
 
 ## Testes
 

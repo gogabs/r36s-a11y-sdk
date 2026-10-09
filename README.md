@@ -13,10 +13,10 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | [`docs/contrato.md`](docs/contrato.md) | O contrato entre jogos e a plataforma: pacote, ambiente e regras de convivência |
 | [`docs/graficos.md`](docs/graficos.md) | Gráficos opcionais: formas, sprites e texto pela SDL2 do console |
 | [`docs/audio-por-linguagem.md`](docs/audio-por-linguagem.md) | Como fazer áudio em Python, LÖVE, Go, Rust e C# no console |
-| [`python/`](python/) | Biblioteca-ponte Python (`r36s_a11y`) e jogo de exemplo |
-| [`go/`](go/) | Biblioteca-ponte Go (`a11y`), sem cgo, e jogo de exemplo |
-| [`love/`](love/) | Biblioteca-ponte LÖVE (`a11y.lua`), um arquivo só, e jogo de exemplo |
-| [`csharp/`](csharp/) | Biblioteca-ponte C# (`R36S.A11y`) com runtime .NET compartilhado, e jogo de exemplo |
+| [`python/`](python/) | Biblioteca-ponte Python (`r36s_a11y`) e o jogo de exemplo, com som e gráficos |
+| [`go/`](go/) | Biblioteca-ponte Go (`a11y`), sem cgo |
+| [`love/`](love/) | Biblioteca-ponte LÖVE (`a11y.lua`), um arquivo só |
+| [`csharp/`](csharp/) | Biblioteca-ponte C# (`R36S.A11y`) com runtime .NET compartilhado |
 | [`experimentos/audio/`](experimentos/audio/) | Testes de áudio posicional nas cinco linguagens |
 
 ## Como funciona
