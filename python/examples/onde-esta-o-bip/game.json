@@ -2,7 +2,7 @@
   "id": "onde-esta-o-bip",
   "name": "Onde está o bip",
   "description": "Descubra de que lado o bip tocou.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "contract": 1,
   "runtime": "python3",
   "exec": "main.py",
