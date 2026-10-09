@@ -17,7 +17,7 @@ func main() {
 	g.OnDraw(func(gfx *a11y.Graphics) {
 		gfx.Clear(a11y.Hex("#101830"))
 		gfx.Text("Gráficos em Go ÁÇÉ", 320, 20, titulo, a11y.Hex("#ffd23c"), a11y.AlignCenter)
-		gfx.Polygon([]a11y.Point{{320, 120}, {290, 160}, {350, 160}}, a11y.RGB(60, 200, 90))
+		gfx.Polygon([]a11y.Point{a11y.Pt(320, 120), a11y.Pt(290, 160), a11y.Pt(350, 160)}, a11y.RGB(60, 200, 90))
 		gfx.Circle(320, 260, 60, a11y.RGB(40, 50, 80))
 		gfx.CircleLine(320, 260, 60, a11y.RGB(120, 130, 170))
 		gfx.Rect(20, 420, 200, 40, a11y.RGBA(200, 60, 60, 128))

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -92,6 +93,11 @@ var (
 	gfxPixel                   func(r uintptr, x, y int16, red, green, blue, alpha uint8) int32
 )
 
+// A SDL e o contexto OpenGL ES só funcionam na thread que os criou. Prender
+// a goroutine principal à thread principal (no init, antes do main) garante
+// que New, Gfx, Run e os callbacks rodem sempre na mesma thread.
+func init() { runtime.LockOSThread() }
+
 // Color é uma cor RGBA de 0 a 255.
 type Color struct{ R, G, B, A uint8 }
 
@@ -120,6 +126,9 @@ func (c Color) packed() uint32 {
 
 // Point é um ponto na tela.
 type Point struct{ X, Y float64 }
+
+// Pt cria um ponto: a11y.Pt(320, 240).
+func Pt(x, y float64) Point { return Point{X: x, Y: y} }
 
 // Image é uma imagem (textura). Desenhe com Graphics.Draw.
 type Image struct {
