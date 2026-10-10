@@ -51,7 +51,7 @@ Veja [`python/README.md`](python/README.md).
 
 | Linguagem | Biblioteca |
 |---|---|
-| Python | 0.1, funcionando no console |
+| Python | 0.1, funcionando no console e no PC com Windows |
 | Go | 0.1, funcionando no console |
 | C# | 0.1, funcionando no console (runtime .NET compartilhado) |
 | LÖVE | 0.1, funcionando no console (LÖVE 11.4 do ArkOS) |

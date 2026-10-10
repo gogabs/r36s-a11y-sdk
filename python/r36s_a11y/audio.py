@@ -80,7 +80,11 @@ MAX_SOURCES = 32
 
 
 def _load(names):
+    here = os.path.dirname(os.path.abspath(__file__))
     for name in names:
+        # No Windows, a DLL pode estar ao lado da biblioteca (soft_oal.dll, por exemplo).
+        if name.endswith(".dll") and os.path.exists(os.path.join(here, name)):
+            name = os.path.join(here, name)
         try:
             return ctypes.CDLL(name)
         except OSError:
