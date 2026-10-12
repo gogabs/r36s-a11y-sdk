@@ -14,6 +14,7 @@ from .speech import Speech
 
 REPEAT_DELAY = 0.4
 REPEAT_INTERVAL = 0.1
+PC_POLL = 0.004  # no PC, teclado e controle são consultados, não esperados
 
 
 def _game_dir():
@@ -30,6 +31,22 @@ def _manifest(game_dir):
             return json.load(f)
     except (OSError, ValueError):
         return {}
+
+
+def _speech(client, lang):
+    """Speech Dispatcher no console; voz do Windows no PC com Windows.
+
+    A11Y_FALA escolhe outra: "sapi" (Windows), "speechd" ou "terminal"
+    (só escreve no terminal, para o leitor de tela do PC ler).
+    """
+    choice = os.environ.get("A11Y_FALA") or ("sapi" if sys.platform == "win32" else "speechd")
+    if choice == "sapi":
+        from .pc import WindowsSpeech
+        return WindowsSpeech(client=client, language=lang)
+    speech = Speech(client=client, language=lang)
+    if choice == "terminal":
+        speech.available = False
+    return speech
 
 
 class Game:
@@ -57,7 +74,7 @@ class Game:
         self.fps = fps
         self.repeat = repeat
         self.axes = axes
-        self.speech = Speech(client=self.id, language=self.lang)
+        self.speech = _speech(self.id, self.lang)
         self.sound = Audio(self.dir)
         self.input = InputState(deadzone=deadzone)
 
@@ -170,9 +187,15 @@ class Game:
                 fn()
 
     def run(self):
-        reader = GamepadReader(self.input, self.started_at) if sys.platform.startswith("linux") else None
-        if reader is None or not reader.files:
-            print("[r36s_a11y] nenhum controle encontrado em /dev/input", file=sys.stderr)
+        reader = pc = None
+        if sys.platform.startswith("linux"):
+            reader = GamepadReader(self.input, self.started_at)
+            if not reader.files:
+                print("[r36s_a11y] nenhum controle encontrado em /dev/input", file=sys.stderr)
+        elif sys.platform == "win32":
+            from .pc import WindowsInput
+            pc = WindowsInput(self.input, self.ms, lambda: self._gfx)
+            print("[r36s_a11y] PC: " + pc.describe(), file=sys.stderr)
 
         def stop(signum, frame):
             self._running = False
@@ -191,6 +214,10 @@ class Game:
             while self._running:
                 fds = reader.fileno_list() if reader else []
                 timeout = max(0.0, last + step - time.monotonic())
+                if pc:
+                    timeout = min(timeout, PC_POLL)
+                    for event in pc.poll(time.monotonic()):
+                        self._dispatch(event)
                 try:
                     ready = select.select(fds, [], [], timeout)[0] if fds else []
                     if not fds:
