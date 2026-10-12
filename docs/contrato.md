@@ -128,7 +128,9 @@ São o contrato de verdade. A biblioteca-ponte implementa todas.
 ### 4.1 Entrada
 
 1. Ler `/dev/input/event*` (ou SDL, no LÖVE) **sem exclusividade**: nada de
-   `EVIOCGRAB`, porque o a11yd precisa ver os mesmos botões.
+   `EVIOCGRAB`, porque o a11yd precisa ver os mesmos botões. O contrário
+   vale: no modo de aprendizado (Fn + A), o a11yd pega os controles com
+   `EVIOCGRAB` e o jogo não recebe nenhum botão até o modo ser desligado.
 2. Descartar o botão Fn e **qualquer botão apertado enquanto Fn está
    pressionado**: são do sistema.
 3. Descartar rocker de volume e Power.
