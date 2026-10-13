@@ -38,6 +38,7 @@ class InputState:
         self.held = set()         # botões entregues ao jogo e ainda apertados
         self.axis_range = {}      # código -> (mínimo, máximo)
         self.axis_value = {}      # nome -> último valor entregue
+        self.suppressed_axes = set()
 
     def set_axis_range(self, code, minimum, maximum):
         self.axis_range[code] = (minimum, maximum)
@@ -89,6 +90,14 @@ class InputState:
         else:
             # reescala para começar em 0 logo depois da zona morta
             v = (abs(v) - self.deadzone) / (1.0 - self.deadzone) * (1 if v > 0 else -1)
+        if self.fn_held:
+            if v:
+                self.suppressed_axes.add(name)
+            return []
+        if name in self.suppressed_axes:
+            if v:
+                return []
+            self.suppressed_axes.discard(name)
         last = self.axis_value.get(name, 0.0)
         if v == last or (v != 0.0 and abs(v - last) < 0.02):
             return []
@@ -105,6 +114,7 @@ class GamepadReader:
         import fcntl  # só existe no Linux
 
         self.files = []
+        self.pending = {}
         for path in sorted(glob.glob("/dev/input/event*")):
             try:
                 f = open(path, "rb", buffering=0)
@@ -112,6 +122,7 @@ class GamepadReader:
                 continue
             os.set_blocking(f.fileno(), False)
             self.files.append(f)
+            self.pending[f.fileno()] = b""
             for code in AXIS_CODES:
                 try:
                     buf = fcntl.ioctl(f.fileno(), _eviocgabs(code), bytes(ABSINFO.size))
@@ -140,7 +151,10 @@ class GamepadReader:
                 break
             if not data:
                 break
-            for i in range(0, len(data) - EVENT.size + 1, EVENT.size):
+            data = self.pending.get(fd, b"") + data
+            complete = len(data) // EVENT.size * EVENT.size
+            self.pending[fd] = data[complete:]
+            for i in range(0, complete, EVENT.size):
                 sec, usec, ev_type, code, value = EVENT.unpack_from(data, i)
                 ms = int((sec + usec / 1e6 - self.clock_offset) * 1000)
                 out.extend(self.state.feed(ev_type, code, value, ms))
@@ -150,3 +164,4 @@ class GamepadReader:
         for f in self.files:
             f.close()
         self.files = []
+        self.pending.clear()

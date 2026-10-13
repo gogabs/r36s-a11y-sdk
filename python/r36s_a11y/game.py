@@ -174,6 +174,8 @@ class Game:
                 fn(axis, value, ms)
 
     def _tick_repeat(self, now):
+        if self.input.fn_held:
+            return
         for button, when in list(self._repeat_at.items()):
             if now >= when:
                 self._repeat_at[button] = when + REPEAT_INTERVAL

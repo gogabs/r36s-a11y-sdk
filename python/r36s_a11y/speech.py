@@ -14,6 +14,9 @@ VOICE_CONF = os.environ.get("A11Y_VOZ_CONF", "/opt/a11y/etc/voz.conf")
 
 
 def _socket_path():
+    address = os.environ.get("SPEECHD_ADDRESS", "")
+    if address.startswith("unix_socket:"):
+        return address[len("unix_socket:"):]
     runtime = os.environ.get("XDG_RUNTIME_DIR") or "/run/user/%d" % os.getuid()
     return os.path.join(runtime, "speech-dispatcher", "speechd.sock")
 
@@ -58,6 +61,7 @@ class Speech:
         self.callbacks = {}   # id da mensagem -> função(done)
         self.events = []      # (função, done) prontos para chamar no laço
         self.available = True
+        self.voice_values = None
 
     # --- conexão -------------------------------------------------------
     def _connect(self):
@@ -70,17 +74,31 @@ class Speech:
         user = os.environ.get("USER", "ark")
         self._cmd("SET SELF CLIENT_NAME %s:a11y:%s" % (user, self.client))
         voice = _user_voice()
+        self._apply_voice(voice)
+        self._cmd("SET SELF NOTIFICATION END on")
+        self._cmd("SET SELF NOTIFICATION CANCEL on")
+
+    def _apply_voice(self, voice):
+        applied = dict(voice)
+        module = applied.get("VOICE_MODULE")
+        base = {"pt-BR": "pt-br", "en-US": "en-us", "es-ES": "es", "fr-FR": "fr"}.get(self.language, self.language.lower())
+        if module == "rhvoice" and not self.language.lower().startswith("pt"):
+            applied["VOICE_MODULE"], applied["VOICE"] = "espeak-ng", base
+        elif module == "espeak-ng":
+            configured = applied.get("VOICE", "")
+            variant = "+" + configured.split("+", 1)[1] if "+" in configured else ""
+            applied["VOICE"] = base + variant
         # módulo antes do idioma, e voz depois: trocar o idioma pode trocar a voz
-        if "VOICE_MODULE" in voice:
-            self._cmd("SET SELF OUTPUT_MODULE %s" % voice["VOICE_MODULE"])
+        if "VOICE_MODULE" in applied:
+            self._cmd("SET SELF OUTPUT_MODULE %s" % applied["VOICE_MODULE"])
         self._cmd("SET SELF LANGUAGE %s" % self.language)
-        if "VOICE" in voice:
-            self._cmd("SET SELF SYNTHESIS_VOICE %s" % voice["VOICE"])
+        if "VOICE" in applied:
+            self._cmd("SET SELF SYNTHESIS_VOICE %s" % applied["VOICE"])
         for key in ("RATE", "PITCH", "VOLUME"):
             if key in voice:
                 self._cmd("SET SELF %s %d" % (key, voice[key]))
-        self._cmd("SET SELF NOTIFICATION END on")
-        self._cmd("SET SELF NOTIFICATION CANCEL on")
+        self._cmd("SET SELF SSML_MODE off")
+        self.voice_values = voice
 
     def _ensure(self):
         if self.sock is None and self.available:
@@ -88,7 +106,6 @@ class Speech:
                 self._connect()
             except OSError:
                 self.close()
-                self.available = False
         return self.sock is not None
 
     def close(self):
@@ -176,6 +193,13 @@ class Speech:
         return False
 
     # --- API -----------------------------------------------------------
+    def set_language(self, language):
+        if not language or any(c in language for c in "\r\n"):
+            raise ValueError("Invalid speech language")
+        if language != self.language:
+            self.language = language
+            self.voice_values = None
+
     def say(self, text, queue=False, on_done=None):
         """Fala o texto. on_done(done) é chamado ao terminar (done=False se cortada)."""
         for attempt in (1, 2):
@@ -185,6 +209,9 @@ class Speech:
                     self.events.append((on_done, True))
                 return
             try:
+                voice = _user_voice()
+                if voice != self.voice_values:
+                    self._apply_voice(voice)
                 if not queue:
                     self._cmd("STOP SELF")
                 self._cmd("SPEAK")
