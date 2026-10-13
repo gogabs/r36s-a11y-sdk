@@ -52,7 +52,7 @@ class NativeCompatibilityTests(unittest.TestCase):
         speech._cmd=Mock()
         values=dict(VOICE_MODULE='rhvoice',VOICE='Letícia',RATE=84,PITCH=50,VOLUME=85)
         speech._apply_voice(values)
-        commands=[c.args[0] for c in speech._cmd.call_args_list]
+        commands=[c[0][0] for c in speech._cmd.call_args_list]
         self.assertIn('SET SELF OUTPUT_MODULE espeak-ng',commands)
         self.assertIn('SET SELF SYNTHESIS_VOICE en-us',commands)
         self.assertIn('SET SELF RATE 84',commands)
