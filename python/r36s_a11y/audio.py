@@ -455,3 +455,13 @@ class Audio:
         self.al.alcDestroyContext(self.context)
         self.al.alcCloseDevice(self.device)
         self.available = False
+
+
+# Bounded streaming is optional; existing load()/Sound callers remain supported.
+def _install_streaming():
+    import sys
+    from .streaming import install
+    install(sys.modules[__name__])
+
+
+_install_streaming()
