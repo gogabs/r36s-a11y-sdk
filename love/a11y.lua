@@ -181,6 +181,36 @@ local function voz_conf()
   return numbers, names
 end
 
+-- Histórico de falas do sistema (/opt/a11y/log/historico-falas.txt): cada fala
+-- vira uma linha no fim do arquivo, e o a11yd deixa voltar e avançar nas
+-- últimas 50 com Fn + L1 e Fn + R1. Formato comum a todas as bibliotecas-ponte:
+-- uma fala por linha, em UTF-8, sem quebras de linha, só acrescentando no fim.
+-- Quem vê o arquivo passar de 16 KB o reescreve com as últimas 50 linhas. Sem
+-- a pasta do arquivo (no PC, por exemplo), nada é gravado.
+speech.history_path = os.getenv("A11Y_HISTORICO_FALAS") or "/opt/a11y/log/historico-falas.txt"
+
+function speech.record(text, path)
+  path = path or speech.history_path
+  local line = tostring(text):gsub("%s+", " "):gsub("^ ", ""):gsub(" $", "")
+  if line == "" then return end
+  local f = io.open(path, "a") -- falha sem a pasta: nada é gravado
+  if not f then return end
+  f:write(line, "\n")
+  local size = f:seek("end")
+  f:close()
+  if not size or size <= 16384 then return end
+  local lines = {}
+  for l in io.lines(path) do
+    if l:find("%S") then lines[#lines + 1] = l end
+  end
+  local tmp = path .. ".love.tmp"
+  local out = io.open(tmp, "w")
+  if not out then return end
+  for i = math.max(1, #lines - 49), #lines do out:write(lines[i], "\n") end
+  out:close()
+  if not os.rename(tmp, path) then os.remove(tmp) end
+end
+
 --- Formata o texto para o comando SPEAK do SSIP.
 function speech.escape(text)
   local out = {}
@@ -308,6 +338,7 @@ end
 --- é chamado ao fim (terminou = false se a fala foi cortada).
 function a11y.say(text, opts)
   opts = opts or {}
+  speech.record(text) -- Fn + L1/R1 no console
   for _ = 1, 2 do
     if not ensure() then
       io.stderr:write("[fala] " .. text .. "\n")

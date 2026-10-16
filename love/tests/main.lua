@@ -39,6 +39,19 @@ function love.load()
 
   check("escape", a11y.speech.escape("oi\n.ponto") == "oi\r\n..ponto\r\n.\r\n")
 
+  local hist = os.tmpname()
+  os.remove(hist)
+  for i = 1, 2000 do a11y.speech.record("Fala\nnúmero " .. i, hist) end
+  a11y.speech.record("   ", hist)
+  local lines = {}
+  for l in io.lines(hist) do lines[#lines + 1] = l end
+  check("histórico guarda as últimas", #lines >= 50 and lines[#lines] == "Fala número 2000")
+  local size = io.open(hist):seek("end")
+  check("histórico aparado", size <= 16384 + 100)
+  os.remove(hist)
+  a11y.speech.record("Oi", hist .. "-nao-existe/h.txt")
+  check("histórico sem pasta", io.open(hist .. "-nao-existe/h.txt") == nil)
+
   print(("%d de %d testes passaram"):format(total - failures, total))
   love.event.quit(failures == 0 and 0 or 1)
 end

@@ -70,3 +70,22 @@ public class InputTests
         foreach (var preset in Audio.ReverbPresets.Values) Assert.Equal(10, preset.Count);
     }
 }
+
+public class SpeechHistoryTests
+{
+    [Fact]
+    public void KeepsLastFiftyOneLinePerSpeech()
+    {
+        string dir = Directory.CreateTempSubdirectory().FullName;
+        string path = Path.Combine(dir, "historico-falas.txt");
+        for (int i = 0; i < 2000; i++) SpeechHistory.Record($"Fala\nnúmero {i}", path);
+        SpeechHistory.Record("   ", path);
+        var lines = File.ReadAllLines(path);
+        Assert.True(lines.Length >= SpeechHistory.MaxEntries);
+        Assert.True(new FileInfo(path).Length <= SpeechHistory.TrimBytes + 100);
+        Assert.Equal("Fala número 1999", lines[^1]);
+        SpeechHistory.Record("Oi", Path.Combine(dir, "nao-existe", "h.txt"));
+        Assert.False(File.Exists(Path.Combine(dir, "nao-existe", "h.txt")));
+        Directory.Delete(dir, true);
+    }
+}

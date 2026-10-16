@@ -113,7 +113,7 @@ valores padrão.
 | Quem | Faz | Não faz |
 |---|---|---|
 | Galeria | Lista, fala o menu, abre o jogo, para de ler botões e de falar enquanto ele roda, volta quando ele sai | Não repassa botões nem falas |
-| a11yd | Atalhos com Fn, volume, brilho, bateria, Power, ajustes de voz, saída de emergência | Não interfere no jogo fora disso |
+| a11yd | Atalhos com Fn, volume, brilho, bateria, Power, ajustes de voz, histórico de falas, saída de emergência | Não interfere no jogo fora disso |
 | Biblioteca-ponte | Entrada, fala, áudio, pastas, convenções de botão, menu falado | — |
 | Jogo | A lógica e o conteúdo | Não acessa hardware fora da biblioteca |
 
@@ -164,6 +164,13 @@ Convenção de botões que todos os jogos seguem:
    (seção `voice` de `/roms/a11y/config.json`, ajustados com Fn + direcionais), nunca valores
    próprios do jogo.
 3. Fala interrompe a anterior por padrão; fila é opcional.
+4. Gravar cada fala no histórico do sistema
+   (`/opt/a11y/log/historico-falas.txt`, ou `A11Y_HISTORICO_FALAS`): uma
+   linha por fala, em UTF-8, com as quebras de linha trocadas por espaço,
+   sempre acrescentando no fim. Quem vê o arquivo passar de 16 KB o reescreve
+   com as últimas 50 linhas (arquivo temporário e `rename`). O jogador volta
+   e avança nas últimas 50 falas com Fn + L1 e Fn + R1, lidas pelo a11yd. Sem
+   a pasta (no PC), nada é gravado.
 
 ### 4.3 Áudio
 
