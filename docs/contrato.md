@@ -38,7 +38,12 @@ Consequências:
 
 ## 2. Pacote de jogo
 
-Cada jogo é uma pasta em `/opt/a11y/games/<id>/`:
+Cada jogo é uma pasta em `/roms/a11y/games/<id>/`, na partição EASYROMS, a
+mesma das ROMs. Quem joga instala um jogo copiando a pasta dele para
+`a11y/games` no cartão, pelo computador. A galeria também lê
+`/opt/a11y/games/<id>/`, onde os jogos ficavam antes; se o mesmo id estiver nas
+duas, vale o do cartão. Como a EASYROMS é exFAT, o pacote não pode ter links
+simbólicos nem dois arquivos cujo nome só difere em maiúsculas.
 
 ```
 corrida-de-sapos/
@@ -86,7 +91,7 @@ A galeria inicia o jogo com a pasta do jogo como diretório atual e:
 | Variável | Exemplo | Uso |
 |---|---|---|
 | `A11Y_CONTRACT` | `1` | Versão do contrato da plataforma |
-| `A11Y_GAME_DIR` | `/opt/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
+| `A11Y_GAME_DIR` | `/roms/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
 | `A11Y_SAVE_DIR` | `/opt/a11y/saves/corrida-de-sapos` | Já criada; único lugar gravável garantido |
 | `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações da galeria (`/opt/a11y/etc/sistema.conf`) |
 

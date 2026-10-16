@@ -59,7 +59,7 @@ end
 
 `game.json` com `"runtime": "love"` e `"exec": "."` (veja o
 [contrato](../docs/contrato.md)). Para instalar, copie a pasta para
-`/opt/a11y/games/meu-jogo`.
+`/roms/a11y/games/meu-jogo` (pasta `a11y/games` do cartão).
 
 ## API
 
