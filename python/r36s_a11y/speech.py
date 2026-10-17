@@ -1,7 +1,8 @@
 """Fala pelo Speech Dispatcher (protocolo SSIP direto no socket Unix).
 
 Regras do contrato:
-  - usa a voz do usuário (/opt/a11y/etc/voz.conf), nunca valores próprios;
+  - usa a voz do usuário (seção "voice" de /roms/a11y/config.json), nunca
+    valores próprios;
   - fala interrompe a anterior por padrão; fila é opcional.
 
 Sem Speech Dispatcher (no PC, por exemplo), a fala vai para o terminal.
@@ -10,7 +11,25 @@ import os
 import socket
 import sys
 
-VOICE_CONF = os.environ.get("A11Y_VOZ_CONF", "/opt/a11y/etc/voz.conf")
+CONFIG = "/roms/a11y/config.json"
+LEGACY_VOICE_CONF = "/opt/a11y/etc/voz.conf"  # antes do config.json
+
+
+def _voice_conf():
+    path = os.environ.get("A11Y_VOZ_CONF")
+    if path:
+        return path
+    return CONFIG if os.path.exists(CONFIG) else LEGACY_VOICE_CONF
+
+
+def _conf_line(line):
+    """(chave, valor) de uma linha "KEY": valor, do JSON ou KEY=valor."""
+    line = line.strip().rstrip(",")
+    if line.startswith('"') and '":' in line:
+        key, _, val = line[1:].partition('":')
+    else:
+        key, _, val = line.partition("=")
+    return key.strip(), val.strip().strip("'\"")
 
 
 def _socket_path():
@@ -26,14 +45,13 @@ def _user_voice():
     -100..100 do SSIP) e VOICE_MODULE / VOICE (texto, pode vir entre aspas)."""
     values = {}
     try:
-        with open(VOICE_CONF) as f:
+        with open(_voice_conf(), encoding="utf-8") as f:
             for line in f:
-                key, sep, val = line.strip().partition("=")
-                if sep and key in ("VOICE_MODULE", "VOICE"):
-                    val = val.strip().strip("'\"")
+                key, val = _conf_line(line)
+                if key in ("VOICE_MODULE", "VOICE"):
                     if val:
                         values[key] = val
-                elif sep and key in ("RATE", "PITCH", "VOLUME"):
+                elif key in ("RATE", "PITCH", "VOLUME"):
                     try:
                         values[key] = max(0, min(100, int(val))) * 2 - 100
                     except ValueError:

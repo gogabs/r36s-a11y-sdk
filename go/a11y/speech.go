@@ -14,7 +14,7 @@ import (
 
 // Speech fala pelo Speech Dispatcher (protocolo SSIP no socket Unix).
 //
-// Regras do contrato: usa a voz do usuário (/opt/a11y/etc/voz.conf), nunca
+// Regras do contrato: usa a voz do usuário (seção "voice" de /roms/a11y/config.json), nunca
 // valores próprios; fala interrompe a anterior por padrão. Sem Speech
 // Dispatcher (no PC, por exemplo), a fala vai para o stderr.
 type Speech struct {
@@ -52,7 +52,10 @@ func speechSocket() string {
 func userVoice() (map[string]int, map[string]string) {
 	path := os.Getenv("A11Y_VOZ_CONF")
 	if path == "" {
-		path = "/opt/a11y/etc/voz.conf"
+		path = "/roms/a11y/config.json"
+		if _, err := os.Stat(path); err != nil {
+			path = "/opt/a11y/etc/voz.conf" // antes do config.json
+		}
 	}
 	out, names := map[string]int{}, map[string]string{}
 	data, err := os.ReadFile(path)
@@ -60,7 +63,7 @@ func userVoice() (map[string]int, map[string]string) {
 		return out, names
 	}
 	for _, line := range strings.Split(string(data), "\n") {
-		k, v, ok := strings.Cut(strings.TrimSpace(line), "=")
+		k, v, ok := confLine(line)
 		if ok && (k == "VOICE_MODULE" || k == "VOICE") {
 			if v = strings.Trim(strings.TrimSpace(v), `'"`); v != "" {
 				names[k] = v
@@ -76,6 +79,19 @@ func userVoice() (map[string]int, map[string]string) {
 		}
 	}
 	return out, names
+}
+
+// confLine lê uma linha "KEY": valor, do config.json, ou KEY=valor.
+func confLine(line string) (string, string, bool) {
+	line = strings.TrimSuffix(strings.TrimSpace(line), ",")
+	var k, v string
+	var ok bool
+	if strings.HasPrefix(line, `"`) {
+		k, v, ok = strings.Cut(line[1:], `":`)
+	} else {
+		k, v, ok = strings.Cut(line, "=")
+	}
+	return strings.TrimSpace(k), strings.Trim(strings.TrimSpace(v), `'"`), ok
 }
 
 // escapeText formata o texto para o comando SPEAK do SSIP.

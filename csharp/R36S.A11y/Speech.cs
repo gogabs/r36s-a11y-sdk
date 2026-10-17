@@ -6,7 +6,7 @@ namespace R36S.A11y;
 
 /// <summary>
 /// Fala pelo Speech Dispatcher (protocolo SSIP no socket Unix).
-/// Usa a voz do usuário (/opt/a11y/etc/voz.conf), nunca valores próprios; fala
+/// Usa a voz do usuário (seção "voice" de /roms/a11y/config.json), nunca valores próprios; fala
 /// interrompe a anterior por padrão. Sem Speech Dispatcher (no PC, por
 /// exemplo), a fala vai para o stderr.
 /// </summary>
@@ -41,7 +41,8 @@ public sealed class Speech
     /// <summary>Voz do usuário: RATE, PITCH, VOLUME (0..100 → -100..100), VOICE_MODULE e VOICE.</summary>
     internal static (Dictionary<string, int> Numbers, Dictionary<string, string> Names) UserVoice()
     {
-        var path = Environment.GetEnvironmentVariable("A11Y_VOZ_CONF") ?? "/opt/a11y/etc/voz.conf";
+        var path = Environment.GetEnvironmentVariable("A11Y_VOZ_CONF")
+            ?? (File.Exists("/roms/a11y/config.json") ? "/roms/a11y/config.json" : "/opt/a11y/etc/voz.conf");
         var numbers = new Dictionary<string, int>();
         var names = new Dictionary<string, string>();
         string[] lines;
@@ -49,10 +50,13 @@ public sealed class Speech
         catch (Exception) { return (numbers, names); }
         foreach (var raw in lines)
         {
-            var line = raw.Trim();
-            int eq = line.IndexOf('=');
+            // "KEY": valor, no config.json, ou KEY=valor no arquivo antigo.
+            var line = raw.Trim().TrimEnd(',');
+            bool json = line.StartsWith('"');
+            int eq = json ? line.IndexOf("\":", StringComparison.Ordinal) : line.IndexOf('=');
             if (eq < 0) continue;
-            string key = line[..eq], val = line[(eq + 1)..].Trim();
+            string key = json ? line[1..eq] : line[..eq].Trim();
+            string val = line[(eq + (json ? 2 : 1))..].Trim().Trim('\'', '"');
             if (key is "VOICE_MODULE" or "VOICE")
             {
                 val = val.Trim('\'', '"');
