@@ -66,6 +66,7 @@ corrida-de-sapos/
   "runtime": "native",
   "exec": "bin/jogo",
   "languages": ["pt-BR"],
+  "tags": ["a11y"],
   "author": "Gabs"
 }
 ```
@@ -80,6 +81,7 @@ corrida-de-sapos/
 | `runtime` | sim | `native` (binário arm64), `python3`, `love` ou `dotnet` |
 | `exec` | sim | Relativo à pasta. Para `love`, o `.love` ou a pasta; para `python3`, o `.py`; para `dotnet`, a `.dll` |
 | `languages` | não | Idiomas que o jogo fala; padrão `["pt-BR"]` |
+| `tags` | não | Tags para o filtro da galeria (botão Y), em minúsculas; padrão `["a11y"]`. Os nossos jogos usam `"a11y"`, que é o filtro padrão |
 | `author` | não | Autor |
 
 O `runtime` deixa a galeria montar o comando certo (`python3 x.py`,

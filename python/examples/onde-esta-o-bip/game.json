@@ -7,5 +7,6 @@
   "runtime": "python3",
   "exec": "main.py",
   "languages": ["pt-BR"],
+  "tags": ["a11y"],
   "author": "R36S A11y"
 }
