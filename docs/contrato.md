@@ -165,7 +165,7 @@ Convenção de botões que todos os jogos seguem:
    próprios do jogo.
 3. Fala interrompe a anterior por padrão; fila é opcional.
 4. Gravar cada fala no histórico do sistema
-   (`/opt/a11y/log/historico-falas.txt`, ou `A11Y_HISTORICO_FALAS`): uma
+   (`/roms/a11y/log/historico-falas.txt`, ou `A11Y_HISTORICO_FALAS`): uma
    linha por fala, em UTF-8, com as quebras de linha trocadas por espaço,
    sempre acrescentando no fim. Quem vê o arquivo passar de 16 KB o reescreve
    com as últimas 50 linhas (arquivo temporário e `rename`). O jogador volta

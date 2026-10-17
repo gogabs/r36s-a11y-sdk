@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Histórico de falas do sistema (/opt/a11y/log/historico-falas.txt).
+// Histórico de falas do sistema (/roms/a11y/log/historico-falas.txt).
 //
 // Cada fala do jogo vira uma linha no fim do arquivo; o a11yd deixa o jogador
 // voltar e avançar nas últimas 50 com Fn + L1 e Fn + R1. Formato comum a todas
@@ -24,7 +24,7 @@ func historyPath() string {
 	if p := os.Getenv("A11Y_HISTORICO_FALAS"); p != "" {
 		return p
 	}
-	return "/opt/a11y/log/historico-falas.txt"
+	return "/roms/a11y/log/historico-falas.txt"
 }
 
 func recordSpeech(path, text string) {
@@ -58,10 +58,11 @@ func recordSpeech(path, text string) {
 	if len(lines) > historyMaxEntries {
 		lines = lines[len(lines)-historyMaxEntries:]
 	}
+	out := []byte(strings.Join(lines, "\n") + "\n")
 	tmp := path + "." + strconv.Itoa(os.Getpid()) + ".tmp"
-	if os.WriteFile(tmp, []byte(strings.Join(lines, "\n")+"\n"), 0o644) == nil {
-		if os.Rename(tmp, path) != nil {
-			os.Remove(tmp)
-		}
+	if os.WriteFile(tmp, out, 0o644) != nil || os.Rename(tmp, path) != nil {
+		// Sem rename por cima (exFAT pela FUSE): reescreve direto.
+		os.Remove(tmp)
+		os.WriteFile(path, out, 0o644)
 	}
 }

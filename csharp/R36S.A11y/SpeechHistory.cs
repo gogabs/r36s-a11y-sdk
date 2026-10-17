@@ -3,7 +3,7 @@ using System.Text;
 namespace R36S.A11y;
 
 /// <summary>
-/// Histórico de falas do sistema (/opt/a11y/log/historico-falas.txt).
+/// Histórico de falas do sistema (/roms/a11y/log/historico-falas.txt).
 /// Cada fala do jogo vira uma linha no fim do arquivo; o a11yd deixa o jogador
 /// voltar e avançar nas últimas 50 com Fn + L1 e Fn + R1. Formato comum a todas
 /// as bibliotecas-ponte: uma fala por linha, em UTF-8, com as quebras de linha
@@ -19,7 +19,7 @@ internal static class SpeechHistory
 
     internal static string DefaultPath =>
         Environment.GetEnvironmentVariable("A11Y_HISTORICO_FALAS") is { Length: > 0 } p
-            ? p : "/opt/a11y/log/historico-falas.txt";
+            ? p : "/roms/a11y/log/historico-falas.txt";
 
     internal static void Record(string text, string? path = null)
     {
@@ -37,9 +37,19 @@ internal static class SpeechHistory
             }
             if (size <= TrimBytes) return;
             var lines = File.ReadAllLines(path, Utf8).Select(l => l.Trim()).Where(l => l.Length > 0).ToArray();
+            string data = string.Concat(lines.Skip(Math.Max(0, lines.Length - MaxEntries)).Select(l => l + "\n"));
             string tmp = $"{path}.{Environment.ProcessId}.tmp";
-            File.WriteAllText(tmp, string.Concat(lines.Skip(Math.Max(0, lines.Length - MaxEntries)).Select(l => l + "\n")), Utf8);
-            File.Move(tmp, path, true);
+            try
+            {
+                File.WriteAllText(tmp, data, Utf8);
+                File.Move(tmp, path, true);
+            }
+            catch (Exception)
+            {
+                // Sem rename por cima (exFAT pela FUSE): reescreve direto.
+                try { File.Delete(tmp); } catch (Exception) { }
+                File.WriteAllText(path, data, Utf8);
+            }
         }
         catch (Exception) { }
     }

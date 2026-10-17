@@ -181,13 +181,13 @@ local function voz_conf()
   return numbers, names
 end
 
--- Histórico de falas do sistema (/opt/a11y/log/historico-falas.txt): cada fala
+-- Histórico de falas do sistema (/roms/a11y/log/historico-falas.txt): cada fala
 -- vira uma linha no fim do arquivo, e o a11yd deixa voltar e avançar nas
 -- últimas 50 com Fn + L1 e Fn + R1. Formato comum a todas as bibliotecas-ponte:
 -- uma fala por linha, em UTF-8, sem quebras de linha, só acrescentando no fim.
 -- Quem vê o arquivo passar de 16 KB o reescreve com as últimas 50 linhas. Sem
 -- a pasta do arquivo (no PC, por exemplo), nada é gravado.
-speech.history_path = os.getenv("A11Y_HISTORICO_FALAS") or "/opt/a11y/log/historico-falas.txt"
+speech.history_path = os.getenv("A11Y_HISTORICO_FALAS") or "/roms/a11y/log/historico-falas.txt"
 
 function speech.record(text, path)
   path = path or speech.history_path
@@ -203,12 +203,21 @@ function speech.record(text, path)
   for l in io.lines(path) do
     if l:find("%S") then lines[#lines + 1] = l end
   end
+  local data = table.concat(lines, "\n", math.max(1, #lines - 49), #lines) .. "\n"
   local tmp = path .. ".love.tmp"
   local out = io.open(tmp, "w")
-  if not out then return end
-  for i = math.max(1, #lines - 49), #lines do out:write(lines[i], "\n") end
-  out:close()
-  if not os.rename(tmp, path) then os.remove(tmp) end
+  if out then
+    out:write(data)
+    out:close()
+    if os.rename(tmp, path) then return end
+    os.remove(tmp)
+  end
+  -- Sem rename por cima (exFAT pela FUSE): reescreve direto.
+  out = io.open(path, "w")
+  if out then
+    out:write(data)
+    out:close()
+  end
 end
 
 --- Formata o texto para o comando SPEAK do SSIP.

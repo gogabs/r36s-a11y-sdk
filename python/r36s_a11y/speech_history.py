@@ -1,4 +1,4 @@
-"""Histórico de falas do sistema (/opt/a11y/log/historico-falas.txt).
+"""Histórico de falas do sistema (/roms/a11y/log/historico-falas.txt).
 
 Cada fala do jogo vira uma linha no fim do arquivo; o a11yd deixa o jogador
 voltar e avançar nas últimas 50 com Fn + L1 e Fn + R1. Formato comum a todas
@@ -10,7 +10,7 @@ Sem a pasta do arquivo (no PC, por exemplo), nada é gravado.
 """
 import os
 
-PATH = os.environ.get("A11Y_HISTORICO_FALAS", "/opt/a11y/log/historico-falas.txt")
+PATH = os.environ.get("A11Y_HISTORICO_FALAS", "/roms/a11y/log/historico-falas.txt")
 MAX_ENTRIES = 50
 TRIM_BYTES = 16384
 
@@ -28,9 +28,17 @@ def record(text, path=None):
         if size > TRIM_BYTES:
             with open(path, encoding="utf-8", errors="replace") as f:
                 lines = [l.strip() for l in f if l.strip()][-MAX_ENTRIES:]
+            data = "".join(l + "\n" for l in lines)
             tmp = "%s.%d.tmp" % (path, os.getpid())
-            with open(tmp, "w", encoding="utf-8") as f:
-                f.write("".join(l + "\n" for l in lines))
-            os.replace(tmp, path)
+            try:
+                with open(tmp, "w", encoding="utf-8") as f:
+                    f.write(data)
+                os.replace(tmp, path)
+            except OSError:
+                # Sem rename por cima (exFAT pela FUSE): reescreve direto.
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(data)
+                if os.path.exists(tmp):
+                    os.remove(tmp)
     except OSError:
         pass
