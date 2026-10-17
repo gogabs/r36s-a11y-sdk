@@ -83,7 +83,7 @@ game.Run();
 
 ```bash
 dotnet publish -c Release -o publish
-scp -r publish r36s:/opt/a11y/games/meu-jogo
+scp -r publish r36s:/roms/a11y/games/meu-jogo
 ```
 
 `game.json` com `"runtime": "dotnet"` e `"exec": "MeuJogo.dll"` (veja o

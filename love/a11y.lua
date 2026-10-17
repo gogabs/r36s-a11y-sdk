@@ -161,12 +161,15 @@ local speech = { fd = -1, available = true, buf = "", callbacks = {}, early = {}
 a11y.speech = speech
 
 local function voz_conf()
-  local path = os.getenv("A11Y_VOZ_CONF") or "/opt/a11y/etc/voz.conf"
+  local path = os.getenv("A11Y_VOZ_CONF")
+  local f = io.open(path or "/roms/a11y/config.json")
+  if not f and not path then f = io.open("/opt/a11y/etc/voz.conf") end -- antes do config.json
   local numbers, names = {}, {}
-  local f = io.open(path)
   if not f then return numbers, names end
   for line in f:lines() do
-    local k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+    -- "KEY": valor, no config.json, ou KEY=valor no arquivo antigo.
+    local k, v = line:match('^%s*"([%w_]+)"%s*:%s*(.-)%s*,?%s*$')
+    if not k then k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$") end
     if k == "VOICE_MODULE" or k == "VOICE" then
       v = v:gsub("^['\"]", ""):gsub("['\"]$", "")
       if v ~= "" then names[k] = v end

@@ -38,7 +38,14 @@ Consequências:
 
 ## 2. Pacote de jogo
 
-Cada jogo é uma pasta em `/opt/a11y/games/<id>/`:
+Cada jogo é uma pasta em `/roms/a11y/games/<id>/`, na partição EASYROMS, a
+mesma das ROMs. Quem joga instala um jogo copiando a pasta dele para
+`a11y/games` no cartão, pelo computador. A galeria também lê
+`/opt/a11y/games/<id>/`, onde os jogos ficavam antes; se o mesmo id estiver nas
+duas, vale o do cartão. Os saves ficam ao lado, em `/roms/a11y/saves/<id>`.
+Como a EASYROMS é exFAT, nem o pacote nem os saves podem ter links simbólicos,
+dois arquivos cujo nome só difere em maiúsculas ou caracteres como `:` e `?`
+no nome, e o jogo não deve contar com permissões de arquivo (chmod).
 
 ```
 corrida-de-sapos/
@@ -86,16 +93,16 @@ A galeria inicia o jogo com a pasta do jogo como diretório atual e:
 | Variável | Exemplo | Uso |
 |---|---|---|
 | `A11Y_CONTRACT` | `1` | Versão do contrato da plataforma |
-| `A11Y_GAME_DIR` | `/opt/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
-| `A11Y_SAVE_DIR` | `/opt/a11y/saves/corrida-de-sapos` | Já criada; único lugar gravável garantido |
-| `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações da galeria (`/opt/a11y/etc/sistema.conf`) |
+| `A11Y_GAME_DIR` | `/roms/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
+| `A11Y_SAVE_DIR` | `/roms/a11y/saves/corrida-de-sapos` | Já criada; único lugar gravável garantido |
+| `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações da galeria (seção `system` de `/roms/a11y/config.json`) |
 
 Rodando fora da galeria (SSH, Ports, PC), a biblioteca-ponte preenche
 valores padrão.
 
 ### 2.3 Saída
 
-- stdout e stderr vão para `/opt/a11y/log/<id>.log`.
+- stdout e stderr vão para `/roms/a11y/log/<id>.log`.
 - Código `0` é saída normal. Outro código faz a galeria falar "O jogo
   fechou com erro" antes de voltar ao menu.
 
@@ -154,7 +161,7 @@ Convenção de botões que todos os jogos seguem:
    `$XDG_RUNTIME_DIR/speech-dispatcher/speechd.sock`) com nome de cliente
    `ark:a11y:<id>` e idioma `A11Y_LANG`.
 2. Aplicar a velocidade, o tom e o volume que o usuário escolheu
-   (`/opt/a11y/etc/voz.conf`, ajustados com Fn + direcionais), nunca valores
+   (seção `voice` de `/roms/a11y/config.json`, ajustados com Fn + direcionais), nunca valores
    próprios do jogo.
 3. Fala interrompe a anterior por padrão; fila é opcional.
 
