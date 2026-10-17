@@ -10,6 +10,7 @@ from .audio import Audio
 from .buttons import DOWN, REPEAT
 from .graphics import Graphics
 from .input import GamepadReader, InputState
+from . import speech_history
 from .speech import Speech
 
 REPEAT_DELAY = 0.4
@@ -127,6 +128,7 @@ class Game:
 
     # --- serviços ------------------------------------------------------
     def say(self, text, queue=False, on_done=None):
+        speech_history.record(text)  # Fn + L1/R1 no console
         self.speech.say(text, queue=queue, on_done=on_done)
 
     def hush(self):

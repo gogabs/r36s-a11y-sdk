@@ -181,6 +181,7 @@ public sealed class Speech
     /// </summary>
     public void Say(string text, bool queue = false, Action<bool>? onDone = null)
     {
+        SpeechHistory.Record(text); // Fn + L1/R1 no console
         for (int attempt = 0; attempt < 2; attempt++)
         {
             if (!Ensure())

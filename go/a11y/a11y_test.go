@@ -1,6 +1,12 @@
 package a11y
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+)
 
 const (
 	codeB   = 0x130
@@ -76,4 +82,24 @@ func TestEscapeText(t *testing.T) {
 	if got := escapeText("oi\n.ponto"); got != "oi\r\n..ponto\r\n.\r\n" {
 		t.Fatalf("%q", got)
 	}
+}
+
+func TestSpeechHistoryKeepsLastFifty(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "historico-falas.txt")
+	for i := 0; i < 2000; i++ {
+		recordSpeech(path, "Fala\nnúmero "+strconv.Itoa(i))
+	}
+	recordSpeech(path, "   ")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+	if n := len(lines); n < historyMaxEntries || len(data) > historyTrimBytes+100 {
+		t.Fatalf("%d linhas, %d bytes", n, len(data))
+	}
+	if last := lines[len(lines)-1]; last != "Fala número 1999" {
+		t.Fatalf("última: %q", last)
+	}
+	recordSpeech(filepath.Join(t.TempDir(), "nao-existe", "h.txt"), "Oi") // sem pasta: nada
 }

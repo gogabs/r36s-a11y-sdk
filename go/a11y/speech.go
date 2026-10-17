@@ -226,6 +226,7 @@ func (s *Speech) close() {
 // Say fala o texto. Com queue=false, interrompe a fala anterior. onDone
 // (opcional) recebe true quando a fala termina e false se foi cortada.
 func (s *Speech) Say(text string, queue bool, onDone func(bool)) {
+	recordSpeech(historyPath(), text) // Fn + L1/R1 no console
 	for attempt := 0; attempt < 2; attempt++ {
 		if !s.ensure() {
 			fmt.Fprintln(os.Stderr, "[fala] "+text)
