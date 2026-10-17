@@ -17,14 +17,23 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import r36s_a11y as a11y
 
 ROUNDS = 10
-DIRECTIONS = {
-    "left": ("à esquerda", (-2.0, 0.0, 0.0)),
-    "up": ("à frente", (0.0, 0.0, -2.0)),
-    "right": ("à direita", (2.0, 0.0, 0.0)),
-    "down": ("atrás", (0.0, 0.0, 2.0)),
+DIRECTIONS = {   # ação -> (como falar, posição do som)
+    "esquerda": ("à esquerda", (-2.0, 0.0, 0.0)),
+    "frente": ("à frente", (0.0, 0.0, -2.0)),
+    "direita": ("à direita", (2.0, 0.0, 0.0)),
+    "atrás": ("atrás", (0.0, 0.0, 2.0)),
 }
 
 game = a11y.Game()
+# No R36S, o direcional; no PC, as setas ou WASD; num controle, o direcional.
+game.actions({
+    "esquerda": {"r36s": "left", "key": ["left", "a"]},
+    "frente": {"r36s": "up", "key": ["up", "w"]},
+    "direita": {"r36s": "right", "key": ["right", "d"]},
+    "atrás": {"r36s": "down", "key": ["down", "s"]},
+    "repetir": {"r36s": "select", "key": ["tab", "r"]},
+    "pausa": {"r36s": "start", "key": ["escape", "p"]},
+})
 bip = game.sound.load("bip", "sounds/bip.wav")
 acerto = game.sound.load("acerto", "sounds/acerto.wav")
 erro = game.sound.load("erro", "sounds/erro.wav")
@@ -56,7 +65,7 @@ class Round:
 
     def start(self):
         self.number, self.score = 0, 0
-        game.say("Valendo! Ouça o bip e aperte o direcional para o lado dele.",
+        game.say("Valendo! Ouça o bip e aperte %s para o lado dele." % direcionais(),
                  on_done=lambda done: self.next())
 
     def next(self):
@@ -72,17 +81,17 @@ class Round:
         bip.play(pos=DIRECTIONS[self.answer][1])
         self.waiting = True
 
-    def respond(self, button):
+    def respond(self, action):
         if not self.waiting:
             return
-        if button == "select":
+        if action == "repetir":
             self.play_bip()
             return
-        if button not in DIRECTIONS:
+        if action not in DIRECTIONS:
             return
         self.waiting = False
-        self.feedback = (self.answer, button == self.answer, time.monotonic())
-        if button == self.answer:
+        self.feedback = (self.answer, action == self.answer, time.monotonic())
+        if action == self.answer:
             self.score += 1
             acerto.play()
             game.after(0.5, self.next)
@@ -106,14 +115,22 @@ class Round:
 rodada = Round()
 
 
+def direcionais():
+    """O nome das teclas ou botões de direção no que o jogador está usando."""
+    if game.device == "keyboard":
+        return "as setas"
+    return "o direcional"
+
+
 def on_main(index, item):
     if item == "Jogar":
         main_menu.close()
         rodada.start()
     elif item == "Instruções":
         game.say("Um bip toca à esquerda, à frente, à direita ou atrás de você. "
-                 "Aperte o direcional para o lado de onde ele veio. "
-                 "Select repete o bip. Start pausa. Use fone de ouvido.")
+                 "Aperte %s para o lado de onde ele veio. "
+                 "%s repete o bip. %s pausa. Use fone de ouvido."
+                 % (direcionais(), game.label("repetir"), game.label("pausa")))
     else:
         game.quit()
 
@@ -136,23 +153,23 @@ pause_menu = a11y.Menu(game, "Pausa", ["Continuar", "Sair para o menu"],
                        sounds=menu_sounds)
 
 
-@game.on_button
-def botao(button, state, ms):
+@game.on_action
+def acao(action, state, ms):
     if state != a11y.DOWN or rodada.answer is None:
         return
-    if button == "start":
+    if action == "pausa":
         rodada.waiting = False
         pause_menu.open()
         return
-    rodada.respond(button)
+    rodada.respond(action)
 
 
 # --- gráficos (opcionais: o jogo é todo jogável pelo som) -----------------
 ARROWS = {   # direção -> pontos do triângulo, ao redor do centro (320, 260)
-    "up": [(320, 120), (290, 160), (350, 160)],
-    "down": [(320, 400), (290, 360), (350, 360)],
-    "left": [(180, 260), (220, 230), (220, 290)],
-    "right": [(460, 260), (420, 230), (420, 290)],
+    "frente": [(320, 120), (290, 160), (350, 160)],
+    "atrás": [(320, 400), (290, 360), (350, 360)],
+    "esquerda": [(180, 260), (220, 230), (220, 290)],
+    "direita": [(460, 260), (420, 230), (420, 290)],
 }
 ouvido = game.gfx.image("images/ouvido.png")
 titulo = game.gfx.font(size=32)

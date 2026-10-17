@@ -4,13 +4,15 @@ Coordenadas da OpenAL (em metros):
   x positivo = direita, y positivo = cima, z negativo = frente.
 
 Só sons mono são posicionados; sons estéreo tocam sempre no centro.
-Arquivos: WAV (PCM 8/16 bits) e OGG Vorbis (pela libvorbisfile do sistema).
+Arquivos: WAV (PCM 8/16 bits) e OGG Vorbis (pela libvorbisfile do sistema ou,
+no Windows, pela libsndfile).
 """
 import ctypes
-import ctypes.util
 import math
 import os
 import wave
+
+from . import native
 
 # --- constantes da OpenAL ------------------------------------------------
 AL_SOURCE_RELATIVE = 0x202
@@ -80,21 +82,7 @@ MAX_SOURCES = 32
 
 
 def _load(names):
-    here = os.path.dirname(os.path.abspath(__file__))
-    for name in names:
-        # No Windows, a DLL pode estar ao lado da biblioteca (soft_oal.dll, por exemplo).
-        if name.endswith(".dll") and os.path.exists(os.path.join(here, name)):
-            name = os.path.join(here, name)
-        try:
-            return ctypes.CDLL(name)
-        except OSError:
-            found = ctypes.util.find_library(name)
-            if found:
-                try:
-                    return ctypes.CDLL(found)
-                except OSError:
-                    pass
-    raise OSError("biblioteca não encontrada: %s" % ", ".join(names))
+    return native.load(names)
 
 
 class _VorbisInfo(ctypes.Structure):
@@ -115,9 +103,19 @@ _vorbis = None
 
 
 def decode_ogg(path):
+    """OGG Vorbis pela libvorbisfile ou, sem ela (no Windows), pela libsndfile."""
+    try:
+        _vorbisfile()
+    except OSError:
+        from . import sndfile
+        return sndfile.decode(path)
+    return _decode_vorbis(path)
+
+
+def _vorbisfile():
     global _vorbis
     if _vorbis is None:
-        lib = _load(["libvorbisfile.so.3", "vorbisfile", "libvorbisfile.dll"])
+        lib = _load(["libvorbisfile.so.3", "vorbisfile", "libvorbisfile.dll", "libvorbisfile-3.dll"])
         lib.ov_fopen.argtypes = [ctypes.c_char_p, ctypes.c_void_p]
         lib.ov_info.restype = ctypes.POINTER(_VorbisInfo)
         lib.ov_info.argtypes = [ctypes.c_void_p, ctypes.c_int]
@@ -127,6 +125,10 @@ def decode_ogg(path):
                                 ctypes.POINTER(ctypes.c_int)]
         lib.ov_clear.argtypes = [ctypes.c_void_p]
         _vorbis = lib
+    return _vorbis
+
+
+def _decode_vorbis(path):
     vf = ctypes.create_string_buffer(8192)  # maior que OggVorbis_File em qualquer arquitetura
     if _vorbis.ov_fopen(path.encode(), vf) != 0:
         raise ValueError("%s: não é um OGG Vorbis válido" % path)

@@ -41,7 +41,7 @@ def _bind(al):
 
 class Decoder:
     def __init__(self, path, module):
-        self.wav = self.vf = None
+        self.wav = self.vf = self.snd = None
         self.lib = None
         self.closed = False
         self.section = None
@@ -53,7 +53,14 @@ class Decoder:
                 self.close()
                 raise ValueError('Unsupported WAV format: '+path)
         else:
-            lib = module._load(['libvorbisfile.so.3', 'vorbisfile', 'libvorbisfile.dll'])
+            try:
+                lib = module._vorbisfile()
+            except OSError:  # Windows: OGG pela libsndfile
+                from .sndfile import SndFile
+                self.snd = SndFile(path)
+                self.channels, self.width, self.rate = self.snd.channels, 2, self.snd.rate
+                self.format = module.FORMATS[(self.channels, self.width)]
+                return
             lib.ov_fopen.argtypes = [C.c_char_p, C.c_void_p]
             lib.ov_fopen.restype = C.c_int
             lib.ov_info.argtypes = [C.c_void_p, C.c_int]
@@ -78,6 +85,8 @@ class Decoder:
     def read(self):
         if self.wav:
             return self.wav.readframes(CHUNK // (self.channels * self.width))
+        if self.snd:
+            return self.snd.read(CHUNK)
         chunk = C.create_string_buffer(CHUNK)
         section = C.c_int(0)
         parts, total, holes = [], 0, 0
@@ -102,6 +111,8 @@ class Decoder:
     def rewind(self):
         if self.wav:
             self.wav.rewind()
+        elif self.snd:
+            self.snd.rewind()
         elif self.lib.ov_pcm_seek(self.vf, 0):
             raise ValueError('Vorbis rewind failed')
         self.section = None
@@ -112,6 +123,8 @@ class Decoder:
         self.closed = True
         if self.wav:
             self.wav.close();self.wav = None
+        if self.snd:
+            self.snd.close();self.snd = None
         if self.vf is not None:
             self.lib.ov_clear(self.vf);self.vf = None
 
