@@ -19,6 +19,9 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | [`csharp/`](csharp/) | Biblioteca-ponte C# (`R36S.A11y`) com runtime .NET compartilhado |
 | [`experimentos/audio/`](experimentos/audio/) | Testes de áudio posicional nas cinco linguagens |
 
+Para criar, rodar e exportar jogos (zip para o cartão e `.exe` para Windows),
+use a [r36s-a11y-engine](https://github.com/gogabs/r36s-a11y-engine).
+
 ## Como funciona
 
 A galeria acessível do console só abre os jogos, como o EmulationStation.
