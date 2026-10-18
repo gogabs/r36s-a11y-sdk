@@ -91,10 +91,12 @@ class CriadorTest(unittest.TestCase):
                                              "__pycache__")), rel)
 
     def test_package_refuses_names_the_card_cannot_hold(self):
-        open(os.path.join(self.game, "sounds", "Bip.wav"), "w").close()
-        open(os.path.join(self.game, "sounds", "o que?.wav"), "w").close()
-        with self.assertRaises(projeto.ProjectError) as e:
-            projeto.package_files(self.game, self.manifest())
+        # O Windows não cria esses nomes, então a pasta é simulada.
+        walk = [(self.game, ["sounds"], ["game.json"]),
+                (os.path.join(self.game, "sounds"), [], ["bip.wav", "Bip.wav", "o que?.wav"])]
+        with mock.patch.object(projeto.os, "walk", lambda path: iter(walk)):
+            with self.assertRaises(projeto.ProjectError) as e:
+                projeto.package_files(self.game, self.manifest())
         self.assertIn("maiúsculas", str(e.exception))
         self.assertIn("o que?.wav", str(e.exception))
 
