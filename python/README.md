@@ -78,6 +78,11 @@ voz.stop(fade=0.5); voz.playing
 game.sound.listener((x, y, z), facing=90)              # graus; 0 = frente, 90 = direita
 ```
 
+Se o arquivo pedido não existir, `load` e `stream` usam o de mesmo nome com a
+outra extensão: `"sounds/passo.wav"` acha o `sounds/passo.ogg`, e
+`"sounds/passo"` acha qualquer um dos dois. É o que deixa a exportação do
+[MAGE](https://github.com/gogabs/mage) trocar os WAV por OGG sem mexer no código.
+
 Ambiente (reverberação EFX da OpenAL), para sons tocados com `pos` ou
 `reverb=True`:
 
