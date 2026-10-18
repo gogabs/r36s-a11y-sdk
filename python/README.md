@@ -285,7 +285,7 @@ Assim dá para trocar teclas sem mexer no código.
 
 O [MAGE](https://github.com/gogabs/mage) cria um jogo
 a partir de um modelo, roda, confere e exporta um zip para o cartão do R36S e
-um `.exe` para Windows que abre sem instalar nada. Ela é opcional: um
+um `.exe` para Windows que abre sem instalar nada. Ele é opcional: um
 `main.py` com a pasta `r36s_a11y` ao lado continua sendo um jogo completo.
 
 ## Testes
