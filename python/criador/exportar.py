@@ -22,7 +22,7 @@ PYTHON_SKIP = ("Lib/site-packages/", "Lib/test/", "Lib/idlelib/", "Lib/tkinter/"
                "Lib/pydoc_data/", "Lib/__phello__/", "include/", "libs/",
                "python.exe", "Lib/turtle.py")
 
-LAUNCHER = '''"""Abre o jogo quando o executável começa. Gerado por "a11y.py exportar".
+LAUNCHER = '''"""Abre o jogo quando o executável começa. Gerado por "a11y.py export".
 
 Este Python é só do jogo: o python3XX._pth ao lado o isola do Python
 instalado no computador e faz ele importar este arquivo ao começar.
@@ -112,7 +112,7 @@ def _needs_sdk(path, manifest):
     if manifest.get("runtime") == "python3" and not os.path.isfile(
             os.path.join(path, "r36s_a11y", "__init__.py")):
         raise projeto.ProjectError(
-            "o projeto não tem a pasta r36s_a11y; rode \"a11y.py atualizar\" para copiá-la")
+            "o projeto não tem a pasta r36s_a11y; rode \"a11y.py update\" para copiá-la")
 
 
 def r36s(path, log=print):

@@ -13,7 +13,7 @@ conferido pelo SHA-256 antes de ser extraído:
   nvdaControllerClient64.dll               fala pelo NVDA, do pacote
                                            accessible_output2 (LGPL)
 
-A lista e os downloads ficam em criador/baixar.py. Com o a11y.py, "rodar"
+A lista e os downloads ficam em criador/baixar.py. Com o a11y.py, "run"
 faz isto sozinho quando falta alguma DLL.
 """
 import os

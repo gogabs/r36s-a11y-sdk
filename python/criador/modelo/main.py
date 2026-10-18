@@ -1,7 +1,7 @@
 """Meu jogo, feito com o r36s_a11y.
 
 As ações (bip, repetir, sair) e as teclas e botões de cada uma ficam no
-game.json. Rode com:  python a11y.py rodar  (na pasta do SDK) ou  python main.py
+game.json. Rode com:  python a11y.py run  (na pasta do SDK) ou  python main.py
 """
 import r36s_a11y as a11y
 

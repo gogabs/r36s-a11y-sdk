@@ -273,18 +273,18 @@ Tudo aqui é opcional: um `main.py` com a pasta `r36s_a11y` ao lado continua
 sendo um jogo completo. O `a11y.py`, nesta pasta, cuida do resto:
 
 ```bat
-python a11y.py novo C:\jogos\corrida-de-sapos --nome "Corrida de Sapos"
-python a11y.py rodar C:\jogos\corrida-de-sapos
-python a11y.py exportar C:\jogos\corrida-de-sapos
+python a11y.py new C:\jogos\corrida-de-sapos --name "Corrida de Sapos"
+python a11y.py run C:\jogos\corrida-de-sapos
+python a11y.py export C:\jogos\corrida-de-sapos
 ```
 
 | Comando | O que faz |
 |---|---|
-| `novo <pasta> [--nome] [--autor]` | Cria o jogo a partir do modelo: `game.json` com ações, `main.py`, um bip em `sounds/` e a cópia do `r36s_a11y`. O nome da pasta vira o id |
-| `rodar [pasta] [--pc]` | Abre o jogo. No Windows, baixa as DLLs na primeira vez. No Linux, `--pc` abre a janela em vez de ler o controle do R36S |
-| `conferir [pasta]` | Confere o `game.json`, as ações e os nomes dos arquivos, e mostra todos os problemas de uma vez |
-| `atualizar [pasta]` | Troca a cópia do `r36s_a11y` do jogo pela deste SDK, sem apagar as DLLs |
-| `exportar [pasta] [--para r36s\|windows\|todos]` | Gera em `dist/` o jogo pronto para cada plataforma |
+| `new <pasta> [--name] [--author]` | Cria o jogo a partir do modelo: `game.json` com ações, `main.py`, um bip em `sounds/` e a cópia do `r36s_a11y`. O nome da pasta vira o id |
+| `run [pasta] [--pc]` | Abre o jogo. No Windows, baixa as DLLs na primeira vez. No Linux, `--pc` abre a janela em vez de ler o controle do R36S |
+| `check [pasta]` | Confere o `game.json`, as ações e os nomes dos arquivos, e mostra todos os problemas de uma vez |
+| `update [pasta]` | Troca a cópia do `r36s_a11y` do jogo pela deste SDK, sem apagar as DLLs |
+| `export [pasta] [--to r36s\|windows\|all]` | Gera em `dist/` o jogo pronto para cada plataforma |
 
 Sem pasta, os comandos usam a pasta atual. O código você edita no editor que
 preferir (VS Code, Notepad++...); o `a11y.py` só cuida do projeto.

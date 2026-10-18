@@ -11,7 +11,7 @@ from unittest import mock
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
 
-from criador import baixar, exportar, projeto  # noqa: E402
+from criador import baixar, cli, exportar, projeto  # noqa: E402
 
 
 def fake_python_package():
@@ -126,6 +126,17 @@ class CriadorTest(unittest.TestCase):
         self.assertEqual(pth.split(), ["Lib", "DLLs", ".", "import", "site"])
         compile(launcher, "sitecustomize.py", "exec")
         self.assertIn("'corrida-de-sapos'", launcher)
+
+    def test_cli_commands_are_in_english(self):
+        other = os.path.join(self.tmp.name, "outro-jogo")
+        with mock.patch("sys.stdout", io.StringIO()):
+            self.assertEqual(cli.main(["new", other, "--name", "Outro", "--author", "Gabs"]), 0)
+            self.assertEqual(cli.main(["check", other]), 0)
+            self.assertEqual(cli.main(["export", other, "--to", "r36s"]), 0)
+        self.assertEqual(projeto.load(other)["author"], "Gabs")
+        self.assertTrue(os.path.isfile(os.path.join(other, "dist", "outro-jogo-r36s.zip")))
+        with mock.patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
+            cli.main(["novo", other])
 
     def test_exe_name_is_valid_on_windows(self):
         self.assertEqual(exportar.exe_name("Dead vs. Alive"), "Dead vs. Alive")

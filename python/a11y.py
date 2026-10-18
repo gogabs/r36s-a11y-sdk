@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Cria, roda e exporta jogos feitos com o r36s_a11y.
 
-    python a11y.py novo C:\\jogos\\meu-jogo --nome "Meu Jogo"
-    python a11y.py rodar C:\\jogos\\meu-jogo
-    python a11y.py exportar C:\\jogos\\meu-jogo            # R36S e Windows
-    python a11y.py exportar C:\\jogos\\meu-jogo --para r36s
+    python a11y.py new C:\\jogos\\meu-jogo --name "Meu Jogo"
+    python a11y.py run C:\\jogos\\meu-jogo
+    python a11y.py export C:\\jogos\\meu-jogo              # R36S e Windows
+    python a11y.py export C:\\jogos\\meu-jogo --to r36s
 
 Veja "python a11y.py --help" e o README.
 """
