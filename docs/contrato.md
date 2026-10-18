@@ -84,7 +84,7 @@ corrida-de-sapos/
 | `tags` | não | Tags para o filtro da galeria (botão Y), em minúsculas; padrão `["a11y"]`. Os nossos jogos usam `"a11y"`, que é o filtro padrão |
 | `author` | não | Autor |
 | `actions` | não | Ações do jogo e o que aperta cada uma; a galeria ignora, o SDK Python registra sozinho (veja `python/README.md`) |
-| `export` | não | `{"ignore": [...]}`: o que a [MAGE](https://github.com/gogabs/mage) deixa fora do pacote ao exportar |
+| `export` | não | `{"ignore": [...]}`: o que o [MAGE](https://github.com/gogabs/mage) deixa fora do pacote ao exportar |
 
 O `runtime` deixa a galeria montar o comando certo (`python3 x.py`,
 `/opt/love2d/love x.love`, `dotnet x.dll`) sem o jogo precisar de script de
