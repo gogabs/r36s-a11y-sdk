@@ -102,6 +102,8 @@ class Game:
         self.input = InputState(deadzone=deadzone)
         self.pc = _is_pc()
         self.action_map = Actions()
+        if isinstance(self.manifest.get("actions"), dict):  # ações escritas no game.json
+            self.action_map.define(self.manifest["actions"])
         self.device = KEYBOARD if self.pc else R36S  # quem o jogador está usando
 
         self._handlers = {"button": [], "axis": [], "update": [], "quit": [], "start": [],

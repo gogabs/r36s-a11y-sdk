@@ -83,6 +83,8 @@ corrida-de-sapos/
 | `languages` | não | Idiomas que o jogo fala; padrão `["pt-BR"]` |
 | `tags` | não | Tags para o filtro da galeria (botão Y), em minúsculas; padrão `["a11y"]`. Os nossos jogos usam `"a11y"`, que é o filtro padrão |
 | `author` | não | Autor |
+| `actions` | não | Ações do jogo e o que aperta cada uma; a galeria ignora, o SDK Python registra sozinho (veja `python/README.md`) |
+| `export` | não | `{"ignore": [...]}`: o que o `a11y.py export` deixa fora do pacote |
 
 O `runtime` deixa a galeria montar o comando certo (`python3 x.py`,
 `/opt/love2d/love x.love`, `dotnet x.dll`) sem o jogo precisar de script de

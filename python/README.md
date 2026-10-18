@@ -14,7 +14,9 @@ O mesmo jogo roda no PC com Windows, sem mudar nada: veja
 
 ## Instalação
 
-Copie a pasta `r36s_a11y` para dentro do seu jogo, ao lado do `main.py`.
+Copie a pasta `r36s_a11y` para dentro do seu jogo, ao lado do `main.py`, ou
+crie o jogo pelo `a11y.py`, que faz isso por você: veja
+[Projetos: criar, rodar e exportar](#projetos-criar-rodar-e-exportar).
 
 ## Estrutura de um jogo
 
@@ -264,6 +266,73 @@ pela libsndfile, já que não existe uma vorbisfile.dll oficial para Windows.
 O modo PC também roda no Linux com `A11Y_PLATAFORMA=pc` e a SDL2 instalada,
 com a fala pelo Speech Dispatcher (o mesmo do Orca). Sem a variável, o
 Linux é tratado como o console.
+
+## Projetos: criar, rodar e exportar
+
+Tudo aqui é opcional: um `main.py` com a pasta `r36s_a11y` ao lado continua
+sendo um jogo completo. O `a11y.py`, nesta pasta, cuida do resto:
+
+```bat
+python a11y.py new C:\jogos\corrida-de-sapos --name "Corrida de Sapos"
+python a11y.py run C:\jogos\corrida-de-sapos
+python a11y.py export C:\jogos\corrida-de-sapos
+```
+
+| Comando | O que faz |
+|---|---|
+| `new <pasta> [--name] [--author]` | Cria o jogo a partir do modelo: `game.json` com ações, `main.py`, um bip em `sounds/` e a cópia do `r36s_a11y`. O nome da pasta vira o id |
+| `run [pasta] [--pc]` | Abre o jogo. No Windows, baixa as DLLs na primeira vez. No Linux, `--pc` abre a janela em vez de ler o controle do R36S |
+| `check [pasta]` | Confere o `game.json`, as ações e os nomes dos arquivos, e mostra todos os problemas de uma vez |
+| `update [pasta]` | Troca a cópia do `r36s_a11y` do jogo pela deste SDK, sem apagar as DLLs |
+| `export [pasta] [--to r36s\|windows\|all]` | Gera em `dist/` o jogo pronto para cada plataforma |
+
+Sem pasta, os comandos usam a pasta atual. O código você edita no editor que
+preferir (VS Code, Notepad++...); o `a11y.py` só cuida do projeto.
+
+### Ações no game.json
+
+As ações podem ficar no `game.json`, e o `Game()` as registra sozinho, no
+mesmo formato de `game.actions` (veja [Ações](#ações-um-mapa-de-teclas-por-jogo)):
+
+```json
+"actions": {
+  "bip": {"r36s": "b", "key": ["space", "return"]},
+  "sair": {"r36s": "a", "key": "escape"}
+}
+```
+
+Assim dá para trocar teclas sem mexer no código, e o editor visual que vier
+depois vai editar esse mesmo arquivo.
+
+### Exportar
+
+- **R36S**: `dist/<id>-r36s.zip`, com a pasta `<id>` para copiar em
+  `a11y/games` no cartão.
+- **Windows**: `dist/<id>-windows.zip`, com a pasta do jogo e o
+  `<Nome do Jogo>.exe`. Quem joga só descompacta e abre o `.exe`, sem instalar
+  Python. Dentro vai o Python 3.13 oficial (do pacote NuGet da Python Software
+  Foundation), isolado do Python do computador, as DLLs do SDK e o jogo, na
+  pasta `jogo`. Os saves e o log (`<id>.log`, com o erro se o jogo fechar com
+  erro) ficam em `%APPDATA%\r36s-a11y\<id>`.
+
+A exportação deixa de fora o que é de desenvolvimento: `.git`, `tests`,
+`tools`, `docs`, `dist` e `previews` da raiz, `__pycache__` e as DLLs (no R36S). Para
+deixar outras coisas de fora:
+
+```json
+"export": {"ignore": ["rascunhos", "*.psd", "/notas.txt"]}
+```
+
+Um padrão sem `/` vale em qualquer pasta, com `/` no começo só na raiz do
+jogo, e com `/` no meio para o caminho inteiro (`sounds/velhos`).
+
+Como o cartão do R36S é exFAT, a exportação recusa links simbólicos, nomes
+com `< > : " \ | ? *` e dois arquivos cujo nome só muda em maiúsculas.
+
+Os downloads (DLLs e Python) são conferidos pelo SHA-256 e guardados em
+`%LOCALAPPDATA%\r36s-a11y\downloads` (ou `~/.cache/r36s-a11y/downloads`),
+então só a primeira exportação baixa. A exportação para Windows funciona a
+partir de qualquer sistema, porque nada é compilado.
 
 ## Testes
 
