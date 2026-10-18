@@ -15,7 +15,7 @@ O mesmo jogo roda no PC com Windows, sem mudar nada: veja
 ## Instalação
 
 Copie a pasta `r36s_a11y` para dentro do seu jogo, ao lado do `main.py`, ou
-crie o jogo pela [r36s-a11y-engine](https://github.com/gogabs/r36s-a11y-engine),
+crie o jogo pela [MAGE](https://github.com/gogabs/mage),
 que faz isso por você.
 
 ## Estrutura de um jogo
@@ -283,7 +283,7 @@ Assim dá para trocar teclas sem mexer no código.
 
 ## Criar, rodar e exportar jogos
 
-A [r36s-a11y-engine](https://github.com/gogabs/r36s-a11y-engine) cria um jogo
+A [MAGE](https://github.com/gogabs/mage) cria um jogo
 a partir de um modelo, roda, confere e exporta um zip para o cartão do R36S e
 um `.exe` para Windows que abre sem instalar nada. Ela é opcional: um
 `main.py` com a pasta `r36s_a11y` ao lado continua sendo um jogo completo.

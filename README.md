@@ -20,7 +20,7 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | [`experimentos/audio/`](experimentos/audio/) | Testes de áudio posicional nas cinco linguagens |
 
 Para criar, rodar e exportar jogos (zip para o cartão e `.exe` para Windows),
-use a [r36s-a11y-engine](https://github.com/gogabs/r36s-a11y-engine).
+use a [MAGE](https://github.com/gogabs/mage).
 
 ## Como funciona
 
