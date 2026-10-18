@@ -508,3 +508,82 @@ class WindowsSpeech:
             except OSError:
                 pass
         self.proc = None
+
+
+# --- fala pelo NVDA -----------------------------------------------------------
+
+def nvda_estimate(text):
+    """Segundos que o NVDA leva para falar o texto (ele não avisa quando
+    termina): uns 15 caracteres por segundo, mais uma pausa."""
+    return 0.4 + len(text) / 15.0
+
+
+def load_nvda():
+    """O cliente do NVDA (nvdaControllerClient), se o NVDA estiver aberto."""
+    from . import native
+    try:
+        lib = native.load(["nvdaControllerClient64.dll", "nvdaControllerClient.dll"],
+                          loader=ctypes.WinDLL)
+    except (OSError, AttributeError):
+        return None
+    for name in ("nvdaController_speakText", "nvdaController_brailleMessage"):
+        getattr(lib, name).argtypes = [ctypes.c_wchar_p]
+    for name in ("nvdaController_speakText", "nvdaController_brailleMessage",
+                 "nvdaController_cancelSpeech", "nvdaController_testIfRunning"):
+        getattr(lib, name).restype = ctypes.c_ulong
+    if lib.nvdaController_testIfRunning() != 0:
+        return None
+    return lib
+
+
+class NvdaSpeech:
+    """Mesma interface do Speech, falando pelo NVDA com a voz, a velocidade
+    e o braille que o jogador escolheu nele.
+
+    O NVDA não avisa quando termina de falar: on_done é chamado depois de
+    um tempo estimado (nvda_estimate), ou com False se a fala for cortada.
+    """
+
+    def __init__(self, lib, clock=None):
+        import time
+        self.lib = lib
+        self.clock = clock or time.monotonic
+        self.available = True
+        self.pending = []    # [quando termina, on_done]
+        self.busy_until = 0.0
+        self.events = []
+
+    def fileno(self):
+        return None
+
+    def say(self, text, queue=False, on_done=None):
+        now = self.clock()
+        if not queue:
+            self.hush()
+        start = max(now, self.busy_until) if queue else now
+        self.busy_until = start + nvda_estimate(text)
+        if self.lib.nvdaController_speakText(text) != 0:   # o NVDA foi fechado
+            self.available = False
+            print("[fala] " + text, file=sys.stderr)
+        self.lib.nvdaController_brailleMessage(text)
+        if on_done is not None:
+            self.pending.append([self.busy_until, on_done])
+
+    def hush(self):
+        self.lib.nvdaController_cancelSpeech()
+        self.busy_until = 0.0
+        for _, fn in self.pending:
+            self.events.append((fn, False))
+        self.pending = []
+
+    def poll(self):
+        now = self.clock()
+        done = [p for p in self.pending if p[0] <= now]
+        if done:
+            self.pending = [p for p in self.pending if p[0] > now]
+            self.events.extend((fn, True) for _, fn in done)
+        ready, self.events = self.events, []
+        return ready
+
+    def close(self):
+        self.pending = []

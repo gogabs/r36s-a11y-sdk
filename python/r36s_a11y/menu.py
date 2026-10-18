@@ -35,8 +35,17 @@ class Menu:
         self.game.push_focus(self)
         text = "%s. %s" % (self.title, self._item_text())
         if announce_help:
-            text += ". " + self.HELP
+            text += ". " + self.help_text()
         self.game.say(text)
+
+    def help_text(self):
+        """Como usar o menu, com os nomes do dispositivo em uso no PC."""
+        device = getattr(self.game, "device", "r36s")
+        label = getattr(self.game, "button_label", None)
+        if device == "r36s" or label is None or type(self).HELP != Menu.HELP:
+            return self.HELP
+        moves = "As setas para cima e para baixo" if device == "keyboard" else "O direcional"
+        return "%s escolhem. %s confirma. %s volta." % (moves, label("b"), label("a"))
 
     def close(self):
         self.is_open = False

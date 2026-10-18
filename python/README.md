@@ -129,18 +129,39 @@ ssh r36s "cd /tmp/sdk/examples/onde-esta-o-bip && python3 main.py"
 
 ## Rodando no PC
 
-No Windows, a biblioteca troca os bastidores sozinha e o jogo não muda.
-Serve para testar rápido; o teste final continua no console, que é mais
-lento e usa outra voz.
+No Windows, o mesmo jogo roda sem mudar nada, numa janela. Serve para
+testar rápido e também para lançar o jogo para PC; o teste final de um jogo
+do console continua no console, que é mais lento e usa outra voz.
+
+### Preparar (uma vez)
+
+Baixe as DLLs para dentro da biblioteca (SDL2, OpenAL Soft, libsndfile e o
+cliente do NVDA, todas de lançamentos oficiais e conferidas pelo SHA-256):
+
+```bat
+python tools\preparar_windows.py
+python tools\preparar_windows.py C:\caminho\do\meu-jogo   :: a cópia dentro de um jogo
+```
+
+Elas ficam em `r36s_a11y\dll\`. Sem elas o jogo ainda abre, no modo antigo:
+teclado só pelo terminal, controle só XInput e nenhum som.
 
 ```bat
 cd examples\onde-esta-o-bip
 python main.py
 ```
 
-Rode no Prompt de Comando ou no Terminal do Windows, com a janela em foco:
-o teclado é lido do console. Se o jogo abrir a tela (`@game.on_draw`), as
-teclas passam a vir da janela do jogo, que fica com o foco.
+### Janela
+
+- Sempre abre uma janela, mesmo em jogo só de áudio. O título é o nome do
+  jogo, que o leitor de tela fala ao trocar de janela.
+- Jogo sem `@game.on_draw` mostra o nome e a última fala, como legenda.
+- A área de desenho continua 640x480, ampliada para o tamanho da janela com
+  tarjas. A janela pode ser redimensionada e maximizada, e respeita a escala
+  do Windows (150%, 200%) sem ficar borrada.
+- F11 ou Alt + Enter: tela cheia. Fechar a janela ou Ctrl + C: sair.
+
+### Teclado, mouse e controles
 
 | Teclado | R36S |
 |---|---|
@@ -155,29 +176,94 @@ teclas passam a vir da janela do jogo, que fica com o foco.
 | Esc | Start (pausa) |
 | Tab | Select (repetir) |
 | Ctrl | Fn: o que for apertado com ele não chega ao jogo |
-| Ctrl + C | Sai do jogo |
 
-**Controle de Xbox** (ou qualquer um compatível com XInput) também
-funciona, junto com o teclado, inclusive os analógicos (`lx ly rx ry`). Os
-botões valem pela posição: o de baixo (A no Xbox) é o B do R36S, o da
-direita (B no Xbox) é o A. LT e RT são L2 e R2, View é Select, Menu é
-Start e o botão Xbox é Fn (o Windows pode abrir a Game Bar com ele; Ctrl
-no teclado faz o mesmo).
+Qualquer controle que a SDL conheça funciona (Xbox, PlayStation, Nintendo,
+8BitDo e genéricos), com conexão e desconexão a qualquer hora ("Controle
+conectado" é falado), analógicos (`lx ly rx ry`) e vibração
+(`game.rumble()`). Os botões valem pelo lugar: o de baixo é o B do R36S em
+qualquer controle. O botão central (Xbox, PS, Home) é o Fn.
 
-**Fala**: usa a voz do Windows no idioma do jogo (pt-BR, por exemplo, a
-Maria), pelo PowerShell que já vem no Windows. A voz começa a falar um ou
-dois segundos depois de abrir o jogo. Variáveis:
+### Ações: um mapa de teclas por jogo
 
-- `A11Y_VOZ`: escolhe a voz pelo nome, por exemplo
+Em vez de pensar nos botões do R36S, o jogo pode dar nomes às ações e dizer
+o que aperta cada uma em cada dispositivo:
+
+```python
+game.actions({
+    "pular":  {"key": "space", "r36s": "b"},              # controle: o botão de baixo
+    "atirar": {"key": ["z", "x"], "r36s": "y", "pad": "x", "mouse": "left"},
+    "pausa":  "start",                                      # só o botão do R36S
+})
+
+@game.on_action
+def acao(nome, estado, ms):
+    if nome == "pular" and estado == a11y.DOWN:
+        ...
+
+game.say("Aperte %s para pular." % game.label("pular"))
+```
+
+`game.label("pular")` diz o nome no que o jogador está usando agora
+(`game.device`): "espaço" no teclado, "B" no R36S, "A" no Xbox, "xis" no
+PlayStation, "B" num controle da Nintendo. `game.label("atirar", every=True)`
+junta todas as opções com "ou".
+
+| Origem | Valores |
+|---|---|
+| `r36s` | `up down left right a b x y l1 r1 l2 r2 l3 r3 start select` |
+| `key` | Nome da tecla: `space`, `return` (ou `enter`), `escape`, `tab`, `backspace`, letras e números (`a`, `ç`, `1`), `up` `down` `left` `right`, `f1`...`f12`, `lshift` `rshift` (ou `shift`), `lalt` `ralt` (ou `alt`), `kp1`, `kp enter`... Ctrl não pode (é o Fn) |
+| `pad` | Nome do Xbox, pelo lugar: `a` (de baixo) `b` `x` `y`, `back` `start`, `leftshoulder` `rightshoulder` (`lb` `rb`), `lefttrigger` `righttrigger` (`lt` `rt`), `leftstick` `rightstick`, `dpup` `dpdown` `dpleft` `dpright` |
+| `mouse` | `left`, `middle`, `right` |
+
+Sem `key` ou sem `pad`, valem as teclas e o botão que ficam no lugar do botão
+`r36s` da ação. Com `Game(repeat=True)`, ações seguradas repetem como os
+botões. Um menu aberto (`a11y.Menu`) fica com a entrada: as ações só chegam
+quando ele fecha. `on_button` continua funcionando, e o menu fala a ajuda
+com os nomes do dispositivo ("Enter confirma" no teclado).
+
+### Outros eventos do PC
+
+| Membro | Descrição |
+|---|---|
+| `@game.on_key` | `fn(tecla, estado, ms)`: toda tecla, com os nomes acima; estado `"down"`, `"up"` ou `"repeat"` (repetição do Windows) |
+| `@game.on_text` | `fn(texto)`: texto digitado, com acentos, para nomes e chat |
+| `@game.on_mouse` | `fn(tipo, x, y, valor)`: `"move"`, `"down"` / `"up"` (valor `"left"`, `"middle"`, `"right"`) e `"wheel"` (valor = cliques); x e y na área de 640x480 |
+| `@game.on_focus` | `fn(com_foco)`: a janela ganhou ou perdeu o foco (ao perder, tudo que estava apertado é solto) |
+| `@game.on_device` | `fn(evento, família, nome)`: controle `"added"` ou `"removed"`; família `"xbox"`, `"playstation"` ou `"nintendo"`. Com esta função, o jogo não fala "Controle conectado" sozinho |
+| `game.device` | `"r36s"`, `"keyboard"`, `"xbox"`, `"playstation"` ou `"nintendo"` |
+| `game.rumble(força, segundos)` | Vibra o último controle usado |
+| `game.fullscreen(on=None)` | Liga, desliga ou alterna a tela cheia |
+| `game.button_label(botão)` | Nome de um botão do R36S no dispositivo em uso |
+
+No console nada disso muda: as ações vêm dos botões do R36S, e os eventos
+do PC nunca acontecem.
+
+### Fala
+
+Com o **NVDA** aberto, o jogo fala por ele, com a voz e a velocidade que o
+jogador escolheu, e manda o texto também para a linha braille. Ctrl cala a
+fala, como sempre no NVDA. O NVDA não avisa quando termina de falar, então o
+`on_done` de `game.say` é chamado depois de um tempo estimado.
+
+Sem o NVDA, usa a voz do Windows no idioma do jogo (pt-BR, por exemplo, a
+Maria), pelo PowerShell que já vem no Windows; ela começa a falar um ou dois
+segundos depois de abrir o jogo. Variáveis:
+
+- `A11Y_FALA`: `nvda`, `sapi` (voz do Windows) ou `terminal` (só escreve no
+  terminal).
+- `A11Y_VOZ`: escolhe a voz do Windows pelo nome, por exemplo
   `set A11Y_VOZ=Microsoft Daniel Desktop`.
-- `A11Y_FALA=terminal`: em vez de falar, escreve no terminal, para o NVDA
-  ler.
 
-**Áudio**: precisa da OpenAL Soft. Baixe os binários em
-[openal-soft.org](https://openal-soft.org/#download) e copie
-`bin\Win64\soft_oal.dll` para dentro da pasta `r36s_a11y` (ou para
-`C:\Windows\System32`). Para OGG, faça o mesmo com a `vorbisfile.dll` e
-suas dependências; ou use WAV no PC.
+### Áudio
+
+OpenAL Soft (`soft_oal.dll`), igual ao console, com HRTF. OGG é decodificado
+pela libsndfile, já que não existe uma vorbisfile.dll oficial para Windows.
+
+### Linux
+
+O modo PC também roda no Linux com `A11Y_PLATAFORMA=pc` e a SDL2 instalada,
+com a fala pelo Speech Dispatcher (o mesmo do Orca). Sem a variável, o
+Linux é tratado como o console.
 
 ## Testes
 
