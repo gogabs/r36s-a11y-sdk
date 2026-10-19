@@ -9,7 +9,7 @@ instalar nem compilar. No console, a biblioteca:
 - lê o controle direto em `/dev/input` pelo FFI do LuaJIT (sem
   exclusividade, o sistema continua recebendo os botões);
 - fala pelo Speech Dispatcher, com a voz que o usuário escolheu;
-- toca som 3D pelo `love.audio` (OpenAL), com eco por ambiente. A galeria
+- toca som 3D pelo `love.audio` (OpenAL), com eco por ambiente. O Luma
   liga o HRTF da OpenAL ao abrir o jogo.
 
 Fora do console, o jogo roda, mas sem controle; a fala vai para o terminal.

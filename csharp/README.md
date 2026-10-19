@@ -29,7 +29,7 @@ Para quem desenvolve, a diferença são três linhas no `.csproj`:
 A biblioteca mira o .NET 8, então qualquer SDK do 8 em diante compila. Com
 `RollForward=LatestMajor`, o jogo roda no .NET 10 do console.
 
-A galeria abre jogos com `"runtime": "dotnet"` usando o runtime
+O Luma abre jogos com `"runtime": "dotnet"` usando o runtime
 compartilhado e define `DOTNET_ROOT`, então o executável gerado pelo
 `dotnet publish` também funciona com `"runtime": "native"`.
 

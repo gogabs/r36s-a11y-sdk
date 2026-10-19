@@ -2,7 +2,7 @@
 
 Contrato entre jogos e a plataforma, e as bibliotecas-ponte por linguagem.
 
-Status: versão 3 (2026-10-08). Decidido: galeria só lançadora, OpenAL como
+Status: versão 3 (2026-10-08). Decidido: Luma só lançador, OpenAL como
 base de áudio, primeira biblioteca em Python. Detalhes de áudio em
 [audio-por-linguagem.md](audio-por-linguagem.md).
 
@@ -10,12 +10,12 @@ base de áudio, primeira biblioteca em Python. Detalhes de áudio em
 
 ## 1. Modelo
 
-Igual ao EmulationStation: a galeria só abre o jogo e espera ele terminar.
+Igual ao EmulationStation: o Luma só abre o jogo e espera ele terminar.
 O jogo é um programa independente que lê o controle, fala e toca som
 sozinho, sempre por meio da biblioteca-ponte da sua linguagem.
 
 ```
-galeria        lista os jogos, fala o menu, abre o escolhido, espera ele sair
+Luma           lista os jogos, fala o menu, abre o escolhido, espera ele sair
    │ inicia
 jogo           lê /dev/input, fala no Speech Dispatcher, toca som pela OpenAL
    │ usa
@@ -26,7 +26,7 @@ a11yd          em paralelo, sempre: Fn, volume, brilho, energia, voz, saída de 
 
 Consequências:
 
-- Não existe protocolo entre jogo e galeria. O "contrato" é: o formato do
+- Não existe protocolo entre jogo e Luma. O "contrato" é: o formato do
   pacote, o ambiente em que o jogo roda e as **regras de convivência** com o
   sistema (seção 4).
 - Um jogo roda sozinho, pelo SSH ou pelo menu Ports do EmulationStation.
@@ -40,7 +40,7 @@ Consequências:
 
 Cada jogo é uma pasta em `/roms/a11y/games/<id>/`, na partição EASYROMS, a
 mesma das ROMs. Quem joga instala um jogo copiando a pasta dele para
-`a11y/games` no cartão, pelo computador. A galeria também lê
+`a11y/games` no cartão, pelo computador. O Luma também lê
 `/opt/a11y/games/<id>/`, onde os jogos ficavam antes; se o mesmo id estiver nas
 duas, vale o do cartão. Os saves ficam ao lado, em `/roms/a11y/saves/<id>`.
 Como a EASYROMS é exFAT, nem o pacote nem os saves podem ter links simbólicos,
@@ -74,40 +74,40 @@ corrida-de-sapos/
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `id` | sim | Minúsculas, números e hífen; igual ao nome da pasta |
-| `name` | sim | Falado na galeria |
+| `name` | sim | Falado no Luma |
 | `description` | não | Falada quando se pede detalhes do jogo |
 | `version` | sim | SemVer |
 | `contract` | sim | Versão deste contrato (`1`) |
 | `runtime` | sim | `native` (binário arm64), `python3`, `love` ou `dotnet` |
 | `exec` | sim | Relativo à pasta. Para `love`, o `.love` ou a pasta; para `python3`, o `.py`; para `dotnet`, a `.dll` |
 | `languages` | não | Idiomas que o jogo fala; padrão `["pt-BR"]` |
-| `tags` | não | Tags para o filtro da galeria (botão Y), em minúsculas; padrão `["a11y"]`. Os nossos jogos usam `"a11y"`, que é o filtro padrão |
+| `tags` | não | Tags para o filtro do Luma (botão Y), em minúsculas; padrão `["a11y"]`. Os nossos jogos usam `"a11y"`, que é o filtro padrão |
 | `author` | não | Autor |
-| `actions` | não | Ações do jogo e o que aperta cada uma; a galeria ignora, o SDK Python registra sozinho (veja `python/README.md`) |
-| `export` | não | `{"ignore": [...]}`: o que o [MAGE](https://github.com/gogabs/mage) deixa fora do pacote ao exportar |
+| `actions` | não | Ações do jogo e o que aperta cada uma; o Luma ignora, o Mage Core em Python registra sozinho (veja `python/README.md`) |
+| `export` | não | `{"ignore": [...]}`: o que o [Mage](https://github.com/gogabs/mage) deixa fora do pacote ao exportar |
 
-O `runtime` deixa a galeria montar o comando certo (`python3 x.py`,
+O `runtime` deixa o Luma montar o comando certo (`python3 x.py`,
 `/opt/love2d/love x.love`, `dotnet x.dll`) sem o jogo precisar de script de
 partida.
 
 ### 2.2 Ambiente
 
-A galeria inicia o jogo com a pasta do jogo como diretório atual e:
+O Luma inicia o jogo com a pasta do jogo como diretório atual e:
 
 | Variável | Exemplo | Uso |
 |---|---|---|
 | `A11Y_CONTRACT` | `1` | Versão do contrato da plataforma |
 | `A11Y_GAME_DIR` | `/roms/a11y/games/corrida-de-sapos` | Pasta do jogo (somente leitura) |
 | `A11Y_SAVE_DIR` | `/roms/a11y/saves/corrida-de-sapos` | Já criada; único lugar gravável garantido |
-| `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações da galeria (seção `system` de `/roms/a11y/config.json`) |
+| `A11Y_LANG` | `pt-BR` | Idioma do sistema, escolhido no menu de configurações do Luma (seção `system` de `/roms/a11y/config.json`) |
 
-Rodando fora da galeria (SSH, Ports, PC), a biblioteca-ponte preenche
+Rodando fora do Luma (SSH, Ports, PC), a biblioteca-ponte preenche
 valores padrão.
 
 ### 2.3 Saída
 
 - stdout e stderr vão para `/roms/a11y/log/<id>.log`.
-- Código `0` é saída normal. Outro código faz a galeria falar "O jogo
+- Código `0` é saída normal. Outro código faz o Luma falar "O jogo
   fechou com erro" antes de voltar ao menu.
 
 ---
@@ -116,14 +116,14 @@ valores padrão.
 
 | Quem | Faz | Não faz |
 |---|---|---|
-| Galeria | Lista, fala o menu, abre o jogo, para de ler botões e de falar enquanto ele roda, volta quando ele sai | Não repassa botões nem falas |
+| Luma | Lista, fala o menu, abre o jogo, para de ler botões e de falar enquanto ele roda, volta quando ele sai | Não repassa botões nem falas |
 | a11yd | Atalhos com Fn, volume, brilho, bateria, Power, ajustes de voz, histórico de falas, saída de emergência | Não interfere no jogo fora disso |
 | Biblioteca-ponte | Entrada, fala, áudio, pastas, convenções de botão, menu falado | — |
 | Jogo | A lógica e o conteúdo | Não acessa hardware fora da biblioteca |
 
 Mudanças necessárias na plataforma:
 
-- **Galeria**: virar só lançadora (hoje ela repassa botões e falas), ler
+- **Luma**: virar só lançador (hoje ele repassa botões e falas), ler
   `game.json` e gravar o PID do jogo em `/run/a11y/jogo.pid`.
 - **a11yd**: Fn + Start segurado por 3 s encerra o jogo do PID gravado
   (SIGTERM, depois SIGKILL). Ajustes de voz passam a valer para todas as
