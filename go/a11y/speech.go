@@ -15,7 +15,8 @@ import (
 // Speech fala pelo Speech Dispatcher (protocolo SSIP no socket Unix).
 //
 // Regras do contrato: usa a voz do usuário (seção "voice" de /roms/a11y/config.json), nunca
-// valores próprios; fala interrompe a anterior por padrão. Sem Speech
+// valores próprios; fala interrompe a anterior por padrão; com a fala
+// desligada no console (Fn + Y), não fala nada. Sem Speech
 // Dispatcher (no PC, por exemplo), a fala vai para o stderr.
 type Speech struct {
 	client, language string
@@ -37,6 +38,18 @@ func newSpeech(client, language string) *Speech {
 		callbacks: map[string]func(bool){},
 		early:     map[string]bool{},
 	}
+}
+
+// speechOff diz se a fala está desligada no console (Fn + Y), para quem
+// enxerga jogar sem o leitor de tela. O a11yd cria e apaga o arquivo, que
+// fica na /run e some ao religar o console.
+func speechOff() bool {
+	path := os.Getenv("A11Y_FALA_DESLIGADA")
+	if path == "" {
+		path = "/run/a11y-fala/fala-desligada"
+	}
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func speechSocket() string {
@@ -227,6 +240,12 @@ func (s *Speech) close() {
 // (opcional) recebe true quando a fala termina e false se foi cortada.
 func (s *Speech) Say(text string, queue bool, onDone func(bool)) {
 	recordSpeech(historyPath(), text) // Fn + L1/R1 no console
+	if speechOff() {
+		if onDone != nil {
+			s.done <- func() { onDone(true) }
+		}
+		return
+	}
 	for attempt := 0; attempt < 2; attempt++ {
 		if !s.ensure() {
 			fmt.Fprintln(os.Stderr, "[fala] "+text)

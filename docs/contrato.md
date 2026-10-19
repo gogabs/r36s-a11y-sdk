@@ -117,7 +117,7 @@ valores padrão.
 | Quem | Faz | Não faz |
 |---|---|---|
 | Luma | Lista, fala o menu, abre o jogo, para de ler botões e de falar enquanto ele roda, volta quando ele sai | Não repassa botões nem falas |
-| a11yd | Atalhos com Fn, volume, brilho, bateria, Power, ajustes de voz, histórico de falas, saída de emergência | Não interfere no jogo fora disso |
+| a11yd | Atalhos com Fn, volume, brilho, bateria, Power, ajustes de voz, histórico de falas, fala ligada/desligada, saída de emergência | Não interfere no jogo fora disso |
 | Biblioteca-ponte | Entrada, fala, áudio, pastas, convenções de botão, menu falado | — |
 | Jogo | A lógica e o conteúdo | Não acessa hardware fora da biblioteca |
 
@@ -175,6 +175,12 @@ Convenção de botões que todos os jogos seguem:
    com as últimas 50 linhas (arquivo temporário e `rename`). O jogador volta
    e avança nas últimas 50 falas com Fn + L1 e Fn + R1, lidas pelo a11yd. Sem
    a pasta (no PC), nada é gravado.
+5. Não falar enquanto existir `/run/a11y-fala/fala-desligada` (ou
+   `A11Y_FALA_DESLIGADA`). O a11yd cria esse arquivo com Fn + Y, para quem
+   enxerga jogar sem o leitor de tela, e o apaga com Fn + Y de novo; ele some
+   ao religar o console. Com a fala desligada, a fala ainda vai para o
+   histórico e o aviso de fim (`on_done`) chega na hora, como fala terminada;
+   sons e música continuam.
 
 ### 4.3 Áudio
 
