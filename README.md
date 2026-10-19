@@ -1,10 +1,12 @@
-# R36S A11y SDK
+# Mage Core
 
-Ferramentas para criar jogos acessíveis para pessoas cegas e com baixa visão
-no console portátil R36S (ArkOS), jogáveis só com som e fala.
+O núcleo do [Mage](https://github.com/gogabs/mage): ferramentas para criar
+jogos acessíveis para pessoas cegas e com baixa visão no console portátil
+R36S (Luma/ArkOS), jogáveis só com som e fala.
 
-*Tools for building audio games, accessible to blind and low-vision players,
-for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
+*Mage Core, the core of the Mage engine: tools for building audio games,
+accessible to blind and low-vision players, for the R36S handheld
+(Luma/ArkOS). Docs are in Brazilian Portuguese.*
 
 ## O que tem aqui
 
@@ -20,11 +22,11 @@ for the R36S handheld (ArkOS). Docs are in Brazilian Portuguese.*
 | [`experimentos/audio/`](experimentos/audio/) | Testes de áudio posicional nas cinco linguagens |
 
 Para criar, rodar e exportar jogos (zip para o cartão e `.exe` para Windows),
-use o [MAGE](https://github.com/gogabs/mage).
+use o Mage.
 
 ## Como funciona
 
-A galeria acessível do console só abre os jogos, como o EmulationStation.
+O Luma só abre os jogos, como o EmulationStation.
 Cada jogo lê o controle, fala pelo Speech Dispatcher e toca som 3D pela
 OpenAL sozinho, sempre por meio da biblioteca-ponte da sua linguagem. A
 biblioteca garante as regras do sistema: Fn e os botões apertados com ele
