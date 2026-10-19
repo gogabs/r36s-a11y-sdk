@@ -220,6 +220,17 @@ function speech.record(text, path)
   end
 end
 
+-- Fala desligada no console (Fn + Y), para quem enxerga jogar sem o leitor de
+-- tela. O a11yd cria e apaga o arquivo, que fica na /run e some ao religar.
+speech.off_path = os.getenv("A11Y_FALA_DESLIGADA") or "/run/a11y-fala/fala-desligada"
+
+function speech.off()
+  local f = io.open(speech.off_path, "r")
+  if not f then return false end
+  f:close()
+  return true
+end
+
 --- Formata o texto para o comando SPEAK do SSIP.
 function speech.escape(text)
   local out = {}
@@ -348,6 +359,10 @@ end
 function a11y.say(text, opts)
   opts = opts or {}
   speech.record(text) -- Fn + L1/R1 no console
+  if speech.off() then
+    if opts.on_done then speech.ready[#speech.ready + 1] = function() opts.on_done(true) end end
+    return
+  end
   for _ = 1, 2 do
     if not ensure() then
       io.stderr:write("[fala] " .. text .. "\n")

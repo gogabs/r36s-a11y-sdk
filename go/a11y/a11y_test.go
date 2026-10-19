@@ -103,3 +103,23 @@ func TestSpeechHistoryKeepsLastFifty(t *testing.T) {
 	}
 	recordSpeech(filepath.Join(t.TempDir(), "nao-existe", "h.txt"), "Oi") // sem pasta: nada
 }
+
+func TestSpeechOffSkipsSpeechAndFinishes(t *testing.T) {
+	flag := filepath.Join(t.TempDir(), "fala-desligada")
+	t.Setenv("A11Y_FALA_DESLIGADA", flag)
+	t.Setenv("A11Y_HISTORICO_FALAS", filepath.Join(t.TempDir(), "nao-existe", "h.txt"))
+	if speechOff() {
+		t.Fatal("sem o arquivo a fala está ligada")
+	}
+	if err := os.WriteFile(flag, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := newSpeech("teste", "pt-BR")
+	s.available = false // se tentasse conectar, cairia no stderr
+	var got []bool
+	s.Say("Oi", false, func(done bool) { got = append(got, done) })
+	(<-s.done)()
+	if s.conn != nil || len(got) != 1 || !got[0] {
+		t.Fatalf("conn=%v got=%v", s.conn, got)
+	}
+}

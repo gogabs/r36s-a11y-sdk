@@ -182,6 +182,11 @@ public sealed class Speech
     public void Say(string text, bool queue = false, Action<bool>? onDone = null)
     {
         SpeechHistory.Record(text); // Fn + L1/R1 no console
+        if (SpeechOff())
+        {
+            if (onDone != null) post(() => onDone(true));
+            return;
+        }
         for (int attempt = 0; attempt < 2; attempt++)
         {
             if (!Ensure())
@@ -201,6 +206,15 @@ public sealed class Speech
             }
         }
     }
+
+    /// <summary>
+    /// A fala está desligada no console (Fn + Y), para quem enxerga jogar sem o
+    /// leitor de tela. O a11yd cria e apaga o arquivo, que fica na /run e some
+    /// ao religar o console.
+    /// </summary>
+    internal static bool SpeechOff() =>
+        File.Exists(Environment.GetEnvironmentVariable("A11Y_FALA_DESLIGADA") is { Length: > 0 } p
+            ? p : "/run/a11y-fala/fala-desligada");
 
     private void Speak(string text, bool queue, Action<bool>? onDone)
     {
