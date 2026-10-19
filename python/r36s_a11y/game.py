@@ -110,6 +110,7 @@ class Game:
                           "draw": [], "action": [], "key": [], "text": [], "mouse": [],
                           "focus": [], "device": []}
         self._gfx = None
+        self._ears = None
         self._desktop = None       # entrada pela janela da SDL, no PC
         self._actions_from_buttons = True  # no console, as ações vêm dos botões do R36S
         self._last_said = ""
@@ -148,6 +149,14 @@ class Game:
             self._gfx = Graphics(self.name, self.dir)
             self._gfx.open(desktop=self.pc)
         return self._gfx
+
+    @property
+    def ears(self):
+        """Sons num ouvido só, para jogos em dupla (abre no primeiro uso). Veja ears.Ears."""
+        if self._ears is None:
+            from .ears import Ears
+            self._ears = Ears(self.dir, fallback=self.sound)
+        return self._ears
 
     # --- ações e entrada do PC ------------------------------------------
     def actions(self, mapping):
@@ -392,6 +401,8 @@ class Game:
                 if now - last >= step:
                     dt, last = now - last, now
                     self.sound.update(dt)
+                    if self._ears is not None:
+                        self._ears.update(dt)
                     for fn in list(self._handlers["update"]):
                         fn(dt)
                     draw = list(self._handlers["draw"]) or ([self._draw_caption] if self.pc else [])
@@ -411,6 +422,8 @@ class Game:
             if self._desktop:
                 self._desktop.close()
             self.speech.close()
+            if self._ears is not None:
+                self._ears.close()
             self.sound.close()
             if self._gfx is not None:
                 self._gfx.close()

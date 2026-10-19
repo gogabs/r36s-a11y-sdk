@@ -96,6 +96,26 @@ Coordenadas em metros: `x` positivo à direita, `y` para cima, `z` negativo
 à frente. Só sons **mono** são posicionados. Sons de banda larga (ruído,
 estalos) ficam mais fáceis de localizar na frente e atrás do que tons puros.
 
+### Som num ouvido só (modo dueto)
+
+Para jogos em dupla em que cada jogador fica com um lado do fone. O áudio 3D
+acima usa HRTF, que imita uma cabeça: um som à esquerda também chega, mais
+baixo, ao ouvido direito. `game.ears` toca pela SDL2_mixer, só no canal
+pedido, sem vazar.
+
+```python
+remo = game.ears.load("remo", "sounds/remo.wav")   # WAV ou OGG
+voz = remo.play(ear="left", loop=False, volume=1.0) # "left", "right" ou "both"
+voz.set_ear("right"); voz.set_volume(0.3, fade=0.5); voz.stop(fade=0.2); voz.playing
+game.ears.swap = True     # troca os lados de tudo, inclusive o que já toca
+game.ears.pause_all(); game.ears.resume_all(); game.ears.stop_all()
+```
+
+Toca junto com `game.sound` e com a fala. Sem a SDL2_mixer (no console ela
+vem com o sistema; no Windows, `tools/preparar_windows.py` baixa), cai para
+a OpenAL com `pan` -1 ou 1 e avisa no log. Não há `pitch` aqui: para variar,
+use arquivos diferentes.
+
 ### Menu
 
 ```python

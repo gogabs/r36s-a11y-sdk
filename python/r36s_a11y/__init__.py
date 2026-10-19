@@ -6,6 +6,7 @@ PC com Windows, abre uma janela pela SDL2 (teclado, mouse e controles) e fala
 pelo NVDA ou pela voz do Windows; tools/preparar_windows.py baixa as DLLs.
 """
 from .audio import Audio, Sound, Voice
+from .ears import Ears
 from .buttons import BUTTONS, DOWN, REPEAT, UP, is_back, is_confirm
 from .game import Game
 from .menu import Menu
@@ -15,6 +16,6 @@ __version__ = "0.4.0"
 CONTRACT = 1
 
 __all__ = [
-    "Audio", "BUTTONS", "CONTRACT", "DOWN", "Game", "Menu", "REPEAT", "Sound",
+    "Audio", "BUTTONS", "CONTRACT", "DOWN", "Ears", "Game", "Menu", "REPEAT", "Sound",
     "Speech", "UP", "Voice", "is_back", "is_confirm",
 ]

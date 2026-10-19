@@ -9,6 +9,8 @@ conferido pelo SHA-256 antes de ser extraído:
   SDL2.dll, SDL2_image.dll, SDL2_ttf.dll   janela, teclado, mouse, controles,
                                            imagens e texto (licença zlib)
   soft_oal.dll                             áudio 3D, OpenAL Soft (LGPL)
+  SDL2_mixer.dll                           som num ouvido só, para o modo
+                                           dueto (licença zlib)
   libsndfile_x64.dll                       OGG, do pacote soundfile (LGPL)
   nvdaControllerClient64.dll               fala pelo NVDA, do pacote
                                            accessible_output2 (LGPL)
@@ -36,6 +38,9 @@ DOWNLOADS = [
     (GH + "/libsdl-org/SDL_ttf/releases/download/release-2.24.0/SDL2_ttf-2.24.0-win32-x64.zip",
      "8d72240aafc783d37d6cf960b1a2138e6ca4eb0c1b5b9a9e71ea299d1ef27ef9",
      {"SDL2_ttf.dll": "SDL2_ttf.dll"}),
+    (GH + "/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1-win32-x64.zip",
+     "ddd4454f9157a01259ac0fd6d9a99663305a358f19f828867064a2186b0f198f",
+     {"SDL2_mixer.dll": "SDL2_mixer.dll", "README.txt": "LICENCA-SDL2_mixer.txt"}),
     (GH + "/kcat/openal-soft/releases/download/1.24.3/openal-soft-1.24.3-bin.zip",
      "03c8c0c0bcdba9d3fb54b0d3c2f9a565f81b3e2a19a538dd394f9b8cb6caaa22",
      {"openal-soft-1.24.3-bin/bin/Win64/soft_oal.dll": "soft_oal.dll",
