@@ -61,6 +61,7 @@ game = a11y.Game(fps=60, repeat=False, axes=False, deadzone=0.2)
 | `game.sound` | O áudio (abaixo) |
 | `game.save_dir`, `game.lang`, `game.dir` | Pastas e idioma |
 | `game.quit()` | Sai do jogo |
+| `game.keep_awake(True)` | Áudio longo sem botões (audiolivro, música): o console não suspende sozinho e a tela apaga logo; `False` (ou sair) desfaz. Veja o contrato, seção 4.4 |
 
 Botões: `up down left right a b x y l1 r1 l2 r2 l3 r3 start select`.
 Convenção: `b` confirma, `a` volta, `start` pausa, `select` repete. Use

@@ -19,6 +19,13 @@ REPEAT_INTERVAL = 0.1
 PC_POLL = 0.004  # no PC, teclado e controle são consultados, não esperados
 
 
+def _playing_file():
+    """Pedido de "não suspender" ao a11yd (contrato, seção 4.4)."""
+    import tempfile
+    return os.environ.get("A11Y_REPRODUZINDO") or os.path.join(
+        os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir(), "a11y-reproduzindo")
+
+
 def _game_dir():
     env = os.environ.get("A11Y_GAME_DIR")
     if env:
@@ -119,6 +126,7 @@ class Game:
         self._repeat_at = {}       # botão -> próximo repeat
         self._focus = []           # pilha de menus que recebem os botões antes do jogo
         self._running = False
+        self._awake = False
         self.started_at = time.time()
 
     # --- registro de funções -------------------------------------------
@@ -244,6 +252,22 @@ class Game:
     def after(self, seconds, fn):
         """Chama fn() daqui a alguns segundos."""
         self._timers.append((time.monotonic() + seconds, fn))
+
+    def keep_awake(self, on=True):
+        """Pede ao a11yd que não suspenda sozinho (e apague a tela logo)
+        enquanto o jogo toca áudio longo sem botões, como um audiolivro.
+        keep_awake(False) devolve a suspensão automática; sair também."""
+        path = _playing_file()
+        try:
+            if on:
+                with open(path + ".tmp", "w") as f:
+                    f.write(str(os.getpid()))
+                os.replace(path + ".tmp", path)
+            elif self._awake:
+                os.remove(path)
+        except OSError:
+            pass
+        self._awake = bool(on)
 
     def ms(self):
         """Milissegundos desde o início do jogo, na mesma escala dos botões."""
@@ -417,6 +441,8 @@ class Game:
                     fn()
                 except Exception as exc:  # salvar não pode impedir a saída
                     print("[r36s_a11y] erro ao sair: %s" % exc, file=sys.stderr)
+            if self._awake:
+                self.keep_awake(False)
             if reader:
                 reader.close()
             if self._desktop:
