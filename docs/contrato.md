@@ -190,15 +190,32 @@ Convenção de botões que todos os jogos seguem:
    (OpenAL Soft como base, SDL2_mixer como alternativa). Jogos não trazem
    `.so` próprias.
 3. Formatos dos arquivos: OGG Vorbis e WAV.
+4. Apps de áudio longo (o player Vinyl, do r36s-a11y) podem tocar pelo
+   `mpv` do sistema, que a plataforma instala, sempre pelo mesmo mixer
+   (`--ao=alsa --audio-device=alsa/default`, ou `pulse` onde houver
+   PulseAudio). Assim tocam MP3, M4B e outros formatos e mudam a velocidade
+   sem mudar o tom. Jogos continuam na OpenAL ou na SDL2_mixer.
 
-### 4.4 Ciclo de vida
+### 4.4 Manter acordado
+
+1. Quem toca áudio longo sem botões apertados (um audiolivro, uma música)
+   grava o próprio PID em `$XDG_RUNTIME_DIR/a11y-reproduzindo` (ou
+   `A11Y_REPRODUZINDO`) enquanto toca, e apaga o arquivo ao pausar ou sair.
+2. Enquanto o arquivo existir e o processo viver, o a11yd não suspende
+   sozinho e apaga a tela 10 s depois do último botão; o primeiro botão
+   acende de novo. O PID evita que um jogo fechado à força deixe o console
+   acordado para sempre.
+3. Na biblioteca Python: `game.keep_awake(True)` e `game.keep_awake(False)`.
+   O `Game` apaga o arquivo sozinho ao sair.
+
+### 4.5 Ciclo de vida
 
 1. `SIGTERM`: salvar e sair em até 2 s.
 2. Suspender e voltar (Power) é transparente: o sistema congela o processo.
 3. Saída de emergência: Fn + Start segurado por 3 s, tratada pelo a11yd.
 4. Gravar só em `A11Y_SAVE_DIR`.
 
-### 4.5 Tela
+### 4.6 Tela
 
 Opcional. Quem quiser desenha pela SDL2 (KMSDRM) ou pelo LÖVE. Todo jogo
 precisa ser jogável sem olhar a tela.
