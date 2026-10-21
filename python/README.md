@@ -60,6 +60,7 @@ game = a11y.Game(fps=60, repeat=False, axes=False, deadzone=0.2)
 | `game.after(segundos, fn)` | Chama `fn()` depois de um tempo |
 | `game.sound` | O áudio (abaixo) |
 | `game.save_dir`, `game.lang`, `game.dir` | Pastas e idioma |
+| `game.high_scores.add(placar, marca, nome)` | Recordes no `high_scores.json` que a Página no PC mostra ([formato](../docs/high-scores.md)) |
 | `game.quit()` | Sai do jogo |
 
 Botões: `up down left right a b x y l1 r1 l2 r2 l3 r3 start select`.

@@ -197,6 +197,8 @@ Convenção de botões que todos os jogos seguem:
 2. Suspender e voltar (Power) é transparente: o sistema congela o processo.
 3. Saída de emergência: Fn + Start segurado por 3 s, tratada pelo a11yd.
 4. Gravar só em `A11Y_SAVE_DIR`.
+5. Recordes, se houver, em `A11Y_SAVE_DIR/high_scores.json`, no formato de
+   [recordes](high-scores.md); a Página no PC mostra e compartilha.
 
 ### 4.5 Tela
 
@@ -227,6 +229,8 @@ API comum (os nomes mudam conforme a convenção de cada linguagem):
   devolvendo uma fonte com `set_position`, `set_pitch`, `stop(fade)`;
   `listener(posição, direção)`.
 - `save_dir`, `lang`, `is_confirm(b)`, `is_back(b)`.
+- `high_scores.add(placar, marca, nome)`, que grava o `high_scores.json`
+  (por enquanto só no Python).
 - `Menu(["Jogar", "Instruções", "Sair"])` falado e pronto, porque é onde
   mais se erra acessibilidade.
 

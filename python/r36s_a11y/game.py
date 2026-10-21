@@ -10,6 +10,7 @@ from .actions import KEYBOARD, R36S, Actions, button_label
 from .audio import Audio
 from .buttons import DOWN, REPEAT, UP
 from .graphics import Graphics
+from .high_scores import HighScores
 from .input import GamepadReader, InputState
 from . import speech_history
 from .speech import Speech
@@ -93,6 +94,7 @@ class Game:
         self.save_dir = os.environ.get("A11Y_SAVE_DIR") or os.path.join(
             os.path.expanduser("~"), ".local", "share", "r36s-a11y", self.id)
         os.makedirs(self.save_dir, exist_ok=True)
+        self.high_scores = HighScores(self.save_dir)
 
         self.fps = fps
         self.repeat = repeat
