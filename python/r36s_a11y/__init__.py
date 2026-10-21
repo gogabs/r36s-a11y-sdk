@@ -9,6 +9,7 @@ from .audio import Audio, Sound, Voice
 from .ears import Ears
 from .buttons import BUTTONS, DOWN, REPEAT, UP, is_back, is_confirm
 from .game import Game
+from .high_scores import HighScores
 from .menu import Menu
 from .speech import Speech
 
@@ -17,5 +18,5 @@ CONTRACT = 1
 
 __all__ = [
     "Audio", "BUTTONS", "CONTRACT", "DOWN", "Ears", "Game", "Menu", "REPEAT", "Sound",
-    "Speech", "UP", "Voice", "is_back", "is_confirm",
+    "HighScores", "Speech", "UP", "Voice", "is_back", "is_confirm",
 ]
